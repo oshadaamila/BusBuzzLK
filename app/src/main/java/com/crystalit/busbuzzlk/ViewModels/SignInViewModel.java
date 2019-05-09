@@ -4,9 +4,9 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 
-public class LoginViewModel extends AndroidViewModel {
+public class SignInViewModel extends AndroidViewModel {
 
-    public LoginViewModel(@NonNull Application application) {
+    public SignInViewModel(@NonNull Application application) {
         super(application);
     }
 
