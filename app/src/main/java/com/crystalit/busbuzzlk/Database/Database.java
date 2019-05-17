@@ -25,7 +25,7 @@ public class Database {
     }
 
     public DatabaseReference getUsersReference() {
-        return firebaseDatabase.getReference("users");
+        return firebaseDatabase.getReference("Users");
     }
 
 }
