@@ -23,7 +23,7 @@ public class SignInViewModel extends AndroidViewModel {
     // This method is called in the user value listener
     public void signInUser(User user) {
         if (user != null) {
-            if (enteredPassword == user.getPassword()) {
+            if (enteredPassword.equals(user.getPassword())) {
                 // TODO save the user and procees to next steps
             } else {
                 Toast.makeText(getApplication(), "Password incorrect", Toast.LENGTH_SHORT).show();
