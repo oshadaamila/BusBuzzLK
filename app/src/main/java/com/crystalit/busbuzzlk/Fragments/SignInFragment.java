@@ -62,7 +62,7 @@ public class SignInFragment extends Fragment {
         ProgressDialog pd = new ProgressDialog(getActivity());
         pd.setMessage("loading");
         pd.setCanceledOnTouchOutside(false);
-        mViewModel.signInUser(userName, password, pd);
+        mViewModel.getUser(userName, password, pd);
         pd.show();
     }
 
