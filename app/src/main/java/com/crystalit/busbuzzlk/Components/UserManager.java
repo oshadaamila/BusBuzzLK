@@ -28,6 +28,13 @@ public class UserManager {
         settings.setUserLogged();
     }
 
+    public void logOutUser(Context context){
+        this.loggedUser = null;
+        Settings settings = new Settings(context);
+        settings.logOutUser();
+
+    }
+
     public User getLoggedUser(){
         return loggedUser;
     }

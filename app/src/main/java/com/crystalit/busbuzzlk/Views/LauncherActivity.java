@@ -25,7 +25,7 @@ public class LauncherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
         Settings settings = new Settings(getApplicationContext());
         if(settings.isUserLogged()){
-            Intent intent = new Intent(getApplicationContext(),HomeActivity.class);
+            Intent intent = new Intent(getApplicationContext(),HomeNavigationActivity.class);
             startActivity(intent);
             finish();
         }

@@ -9,6 +9,7 @@ public class Settings {
 
     private Context mContext;
     private int LOGGED_IN = 1;
+    private int LOGGED_OUT = 0;
     SharedPreferences sharedPref;
 
     public Settings(Context context){
@@ -31,6 +32,12 @@ public class Settings {
         }else{
             return false;
         }
+    }
+
+    public void logOutUser(){
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("LOGGED_IN", LOGGED_OUT);
+        editor.commit();
     }
 
 }

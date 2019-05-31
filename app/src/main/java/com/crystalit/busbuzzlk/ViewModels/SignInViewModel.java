@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.crystalit.busbuzzlk.Components.Settings;
 import com.crystalit.busbuzzlk.Components.UserManager;
 import com.crystalit.busbuzzlk.Database.Dao.UserDao;
-import com.crystalit.busbuzzlk.Views.HomeActivity;
+import com.crystalit.busbuzzlk.Views.HomeNavigationActivity;
 import com.crystalit.busbuzzlk.models.User;
 
 public class SignInViewModel extends AndroidViewModel {
@@ -31,9 +31,11 @@ public class SignInViewModel extends AndroidViewModel {
         if (user != null) {
             if (enteredPassword.equals(user.getPassword())) {
                 userManager.loginUser(user,getApplication().getApplicationContext());
-                Intent intent = new Intent(getApplication().getApplicationContext(),HomeActivity
-                        .class);
+                Intent intent = new Intent(getApplication().getApplicationContext(),
+                        HomeNavigationActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 getApplication().startActivity(intent);
+
             } else {
                 Toast.makeText(getApplication(), "Password incorrect", Toast.LENGTH_SHORT).show();
             }

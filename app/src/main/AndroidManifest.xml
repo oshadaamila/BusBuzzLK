@@ -30,7 +30,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Views.HomeActivity"></activity>
+        <activity android:name=".Views.HomeActivity" />
+        <activity
+            android:name=".Views.HomeNavigationActivity"
+            android:label="@string/title_activity_home_navigation"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
