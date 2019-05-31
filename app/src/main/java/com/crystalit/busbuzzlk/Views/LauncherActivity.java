@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.crystalit.busbuzzlk.Components.Settings;
 import com.crystalit.busbuzzlk.R;
 
 
@@ -15,13 +16,19 @@ public class LauncherActivity extends AppCompatActivity {
     Button btn_sign_in, btn_sign_up;
     int SIGNIN = 0;
     int SIGNUP = 1;
+
     //Entry point of the application, This method will decide whether the user has logged before
     // or not and proceed to the relevant activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
-
+        Settings settings = new Settings(getApplicationContext());
+        if(settings.isUserLogged()){
+            Intent intent = new Intent(getApplicationContext(),HomeActivity.class);
+            startActivity(intent);
+            finish();
+        }
         //initialize view components
         btn_sign_in = findViewById(R.id.btn_signin);
         btn_sign_up = findViewById(R.id.btn_signup);
