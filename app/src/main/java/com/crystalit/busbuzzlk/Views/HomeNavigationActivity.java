@@ -1,14 +1,11 @@
 package com.crystalit.busbuzzlk.Views;
 
-import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.view.View;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,21 +15,27 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.crystalit.busbuzzlk.Fragments.ETAFragment;
 import com.crystalit.busbuzzlk.Fragments.HomeOptionsFragment;
+import com.crystalit.busbuzzlk.Fragments.WaitingFragment;
 import com.crystalit.busbuzzlk.R;
 import com.crystalit.busbuzzlk.ViewModels.HomeNavigationViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeNavigationActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback,HomeOptionsFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback,
+        HomeOptionsFragment.OnFragmentInteractionListener,WaitingFragment.OnFragmentInteractionListener {
 
     HomeNavigationViewModel mViewModel;
+    FragmentManager fragmentManager;
+    enum FragmentType {
+        HOME_FRAGMENT,WAITING_FRAGMENT,ETA_FRAGMENT
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +56,14 @@ public class HomeNavigationActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        fragmentManager = getSupportFragmentManager();
+
         SupportMapFragment mapFragment =  (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id
                 .map_fragment);
         mapFragment.getMapAsync(this);
 
-
+        changeFragment(FragmentType.HOME_FRAGMENT);
     }
 
     @Override
@@ -133,4 +138,35 @@ public class HomeNavigationActivity extends AppCompatActivity
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+
+
+    private void changeFragment(FragmentType fragmentID){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        switch(fragmentID){
+            case HOME_FRAGMENT:
+                HomeOptionsFragment fragment = new HomeOptionsFragment();
+                fragmentTransaction.replace(R.id.fragment_container,fragment);
+                fragmentTransaction.commit();
+                break;
+            case WAITING_FRAGMENT:
+                WaitingFragment waitingFragment = new WaitingFragment();
+                fragmentTransaction.replace(R.id.fragment_container,waitingFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+                break;
+            case ETA_FRAGMENT:
+                ETAFragment etaFragment = new ETAFragment();
+                fragmentTransaction.replace(R.id.fragment_container,etaFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+                break;
+        }
+
+    }
+
+    public void showSearchFragment(){
+        changeFragment(FragmentType.WAITING_FRAGMENT);
+    }
+
 }

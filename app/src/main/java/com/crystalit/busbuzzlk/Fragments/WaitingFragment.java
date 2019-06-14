@@ -1,5 +1,6 @@
 package com.crystalit.busbuzzlk.Fragments;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,25 +8,25 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 
 import com.crystalit.busbuzzlk.R;
-import com.crystalit.busbuzzlk.Views.HomeNavigationActivity;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link HomeOptionsFragment.OnFragmentInteractionListener} interface
+ * {@link WaitingFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeOptionsFragment#newInstance} factory method to
+ * Use the {@link WaitingFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeOptionsFragment extends Fragment {
-
+public class WaitingFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    Button searchButton;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -33,9 +34,7 @@ public class HomeOptionsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    ImageButton searchButton,BusInfoButton,passengerInfoButton;
-
-    public HomeOptionsFragment() {
+    public WaitingFragment() {
         // Required empty public constructor
     }
 
@@ -45,11 +44,11 @@ public class HomeOptionsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeOptionsFragment.
+     * @return A new instance of fragment WaitingFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HomeOptionsFragment newInstance(String param1, String param2) {
-        HomeOptionsFragment fragment = new HomeOptionsFragment();
+    public static WaitingFragment newInstance(String param1, String param2) {
+        WaitingFragment fragment = new WaitingFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -70,13 +69,13 @@ public class HomeOptionsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_home_options, container, false);
-        searchButton = view.findViewById(R.id.searchIButton);
+        View view = inflater.inflate(R.layout.fragment_waiting,container,false);
+        searchButton = view.findViewById(R.id.button);
+
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
-                activity.showSearchFragment();
+                onSearchButtonClicked();
             }
         });
         return view;
@@ -119,5 +118,9 @@ public class HomeOptionsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void onSearchButtonClicked(){
+
     }
 }
