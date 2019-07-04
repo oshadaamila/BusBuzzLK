@@ -1,9 +1,17 @@
 package com.crystalit.busbuzzlk.Views;
 
+import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
+import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.LocaleList;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
@@ -12,29 +20,43 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.crystalit.busbuzzlk.Fragments.ETAFragment;
 import com.crystalit.busbuzzlk.Fragments.HomeOptionsFragment;
 import com.crystalit.busbuzzlk.Fragments.WaitingFragment;
 import com.crystalit.busbuzzlk.R;
 import com.crystalit.busbuzzlk.ViewModels.HomeNavigationViewModel;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class HomeNavigationActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback,
-        HomeOptionsFragment.OnFragmentInteractionListener,WaitingFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
+        HomeOptionsFragment.OnFragmentInteractionListener, WaitingFragment.OnFragmentInteractionListener {
 
     HomeNavigationViewModel mViewModel;
     FragmentManager fragmentManager;
+    LatLng mapLoc;
+    SupportMapFragment mapFragment;
+
+    private FusedLocationProviderClient fusedLocationClient;
+
     enum FragmentType {
-        HOME_FRAGMENT,WAITING_FRAGMENT,ETA_FRAGMENT
+        HOME_FRAGMENT, WAITING_FRAGMENT, ETA_FRAGMENT
     }
 
     @Override
@@ -58,12 +80,38 @@ public class HomeNavigationActivity extends AppCompatActivity
 
         fragmentManager = getSupportFragmentManager();
 
-        SupportMapFragment mapFragment =  (SupportMapFragment) getSupportFragmentManager()
+        mapLoc = new LatLng(6.9147, 79.865);
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id
-                .map_fragment);
+                        .map_fragment);
         mapFragment.getMapAsync(this);
-
         changeFragment(FragmentType.HOME_FRAGMENT);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS,Manifest.permission.ACCESS_FINE_LOCATION},
+                    0);
+
+        }else{
+            Log.d("Loc", "permission check granted");
+            fusedLocationClient.getLastLocation().addOnSuccessListener(this, new
+                    OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    Log.d("Loc", "onSuccess: Location retrieving success");
+                    updateMap(location);
+                }else{
+                    Toast.makeText(getApplicationContext(),"Turn on location services and internet services",
+                            LENGTH_LONG).show();
+                }
+            }
+        });
+        }
+
+
     }
 
     @Override
@@ -128,16 +176,28 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        LatLng sydney = new LatLng(-33.852, 151.211);
-        googleMap.addMarker(new MarkerOptions().position(sydney)
-                .title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-    }
 
+        MarkerOptions marker = new MarkerOptions().position(mapLoc)
+                .title("Your Location");
+        int height = 120;
+        int width = 120;
+        BitmapDrawable bitmapdraw=(BitmapDrawable)getResources().getDrawable(R.drawable.ic_action_person_standing);
+        Bitmap b=bitmapdraw.getBitmap();
+        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+
+        marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+
+        googleMap.addMarker(marker);
+        //googleMap.animateCamera(CameraUpdateFactory.newLatLng(mapLoc));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapLoc, 13.0f));
+
+    }
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+
 
 
 
@@ -168,5 +228,11 @@ public class HomeNavigationActivity extends AppCompatActivity
     public void showSearchFragment(){
         changeFragment(FragmentType.WAITING_FRAGMENT);
     }
+
+    private void updateMap(Location location){
+        mapLoc = new LatLng(location.getLatitude(),location.getLongitude());
+        mapFragment.getMapAsync(this);
+    }
+
 
 }
