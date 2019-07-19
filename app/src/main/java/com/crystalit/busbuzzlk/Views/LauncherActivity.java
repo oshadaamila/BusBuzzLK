@@ -7,7 +7,9 @@ import android.view.View;
 import android.widget.Button;
 
 import com.crystalit.busbuzzlk.Components.Settings;
+import com.crystalit.busbuzzlk.Components.UserManager;
 import com.crystalit.busbuzzlk.R;
+import com.crystalit.busbuzzlk.models.User;
 
 
 //This class will serve as the launcher class
@@ -25,6 +27,8 @@ public class LauncherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
         Settings settings = new Settings(getApplicationContext());
         if(settings.isUserLogged()){
+            User loggedUser= settings.getLoggedUser();
+            UserManager.getInstance().loginUser(loggedUser,getApplicationContext());
             Intent intent = new Intent(getApplicationContext(),HomeNavigationActivity.class);
             startActivity(intent);
             finish();

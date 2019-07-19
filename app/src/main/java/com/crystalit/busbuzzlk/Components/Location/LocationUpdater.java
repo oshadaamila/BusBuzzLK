@@ -10,17 +10,18 @@ import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
 
-public class LocationListener {
+public class LocationUpdater {
 
     LocationRequest locationRequest;
     Context context;
-    public LocationListener(Context context){
+    public LocationUpdater(Context context){
         this.context = context;
     }
 
-    public Task initiateLocationListener(){
+    public Task checkLocationSettings(){
         createLocationRequest();
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(context);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
         return task;
@@ -29,8 +30,17 @@ public class LocationListener {
 
     protected void createLocationRequest() {
         locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
+        locationRequest.setInterval(100);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
+    public LocationRequest getLocationRequest() {
+        if(locationRequest == null){
+            createLocationRequest();
+        }
+        return locationRequest;
+    }
+
+
 }

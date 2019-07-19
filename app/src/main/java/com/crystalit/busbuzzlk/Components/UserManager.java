@@ -25,7 +25,7 @@ public class UserManager {
     public void loginUser(User user,Context context){
         this.loggedUser = user;
         Settings settings = new Settings(context);
-        settings.setUserLogged();
+        settings.setUserLogged(user);
     }
 
     public void logOutUser(Context context){
@@ -38,6 +38,7 @@ public class UserManager {
     public User getLoggedUser(){
         return loggedUser;
     }
+
 
 
 }

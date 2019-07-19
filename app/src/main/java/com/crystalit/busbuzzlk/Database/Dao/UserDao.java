@@ -24,4 +24,20 @@ public class UserDao {
         UserValueLIstener userValueLIstener = new UserValueLIstener(pd, viewModel);
         mDatabase.getUsersReference().child(userName).addListenerForSingleValueEvent(userValueLIstener);
     }
+
+    public void updateUserLocation(User user,double latitude,double longitude,double bearing){
+        mDatabase.getRootReference().child("locations").child(user.getuName()).child("latitude")
+                .setValue(latitude);
+        mDatabase.getRootReference().child("locations").child(user.getuName()).child("longitude")
+                .setValue(longitude);
+        mDatabase.getRootReference().child("locations").child(user.getuName()).child("bearing")
+                .setValue(bearing);
+    }
+
+    public void updateBusRoute(String routeNo, double lat, double longt){
+        mDatabase.getRootReference().child("buses").child(routeNo).child("latitude")
+                .setValue(lat);
+        mDatabase.getRootReference().child("buses").child(routeNo).child("longitude")
+                .setValue(lat);
+    }
 }
