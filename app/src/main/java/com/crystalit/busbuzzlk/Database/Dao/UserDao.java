@@ -6,6 +6,7 @@ import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.Database.ValueListeners.UserValueLIstener;
 import com.crystalit.busbuzzlk.ViewModels.SignInViewModel;
 import com.crystalit.busbuzzlk.models.User;
+import com.firebase.geofire.GeoLocation;
 
 public class UserDao {
 
@@ -39,6 +40,8 @@ public class UserDao {
                 .setValue(user.isInBus());
         mDatabase.getRootReference().child("user_locations").child(user.getuName()).child("route")
                 .setValue(user.getRouteNo());
+        mDatabase.getGeoUserInstance().setLocation(user.getuName(),new GeoLocation(latitude,
+                longitude));
     }
 
 }

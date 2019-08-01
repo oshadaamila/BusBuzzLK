@@ -33,6 +33,7 @@ import com.crystalit.busbuzzlk.Components.Location.LocationUpdater;
 import com.crystalit.busbuzzlk.Components.UserManager;
 import com.crystalit.busbuzzlk.Fragments.ETAFragment;
 import com.crystalit.busbuzzlk.Fragments.HomeOptionsFragment;
+import com.crystalit.busbuzzlk.Fragments.OnBusFragment;
 import com.crystalit.busbuzzlk.Fragments.WaitingFragment;
 import com.crystalit.busbuzzlk.R;
 import com.crystalit.busbuzzlk.ViewModels.HomeNavigationViewModel;
@@ -56,7 +57,8 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class HomeNavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        HomeOptionsFragment.OnFragmentInteractionListener, WaitingFragment.OnFragmentInteractionListener {
+        HomeOptionsFragment.OnFragmentInteractionListener, WaitingFragment
+                .OnFragmentInteractionListener,OnBusFragment.OnFragmentInteractionListener {
 
     HomeNavigationViewModel mViewModel;
     FragmentManager fragmentManager;
@@ -73,7 +75,7 @@ public class HomeNavigationActivity extends AppCompatActivity
     private LocationCallback locationCallback;
 
     enum FragmentType {
-        HOME_FRAGMENT, WAITING_FRAGMENT, ETA_FRAGMENT
+        HOME_FRAGMENT, WAITING_FRAGMENT, ETA_FRAGMENT,ON_BUS_FRAGMENT
     }
 
     @Override
@@ -298,6 +300,10 @@ public class HomeNavigationActivity extends AppCompatActivity
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 break;
+            case ON_BUS_FRAGMENT:
+                OnBusFragment onBusFragment = new OnBusFragment();
+                fragmentTransaction.replace(R.id.fragment_container,onBusFragment);
+                fragmentTransaction.commit();
         }
 
     }
@@ -305,6 +311,11 @@ public class HomeNavigationActivity extends AppCompatActivity
     public void showSearchFragment(){
         changeFragment(FragmentType.WAITING_FRAGMENT);
     }
+
+    public void showBusFragment(){
+        changeFragment(FragmentType.ON_BUS_FRAGMENT);
+    }
+
 
     private void updateMap(Location location,boolean changeZoom){
         this.autoZoom = changeZoom;
