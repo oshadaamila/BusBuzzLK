@@ -10,9 +10,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -59,6 +61,7 @@ public class HomeNavigationActivity extends AppCompatActivity
     HomeNavigationViewModel mViewModel;
     FragmentManager fragmentManager;
     LatLng mapLoc;
+    float bearing, bearing_accuarcy;
     SupportMapFragment mapFragment;
     LocationUpdater locationUpdater;
     boolean autoZoom = true;
@@ -91,7 +94,6 @@ public class HomeNavigationActivity extends AppCompatActivity
         }
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +136,7 @@ public class HomeNavigationActivity extends AppCompatActivity
             checkLocationSettings();
         }
         locationCallback = new LocationCallback(){
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) {
@@ -141,6 +144,8 @@ public class HomeNavigationActivity extends AppCompatActivity
                 }
                 for (Location location : locationResult.getLocations()) {
                     // Update UI with location data
+                    bearing = location.getBearing();
+                    bearing_accuarcy = location.getBearingAccuracyDegrees();
                     mViewModel.updateLocationToDatabase(location.getLatitude(),location
                             .getLongitude(),location.getBearing());
                     updateMap(location,false);
@@ -226,6 +231,8 @@ public class HomeNavigationActivity extends AppCompatActivity
         Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
 
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+        marker.snippet(Double.toString(mapLoc.latitude)+","+Double.toString(mapLoc.longitude)
+                +",bearing:"+Float.toString(bearing)+",bearing_acc:"+Float.toString(bearing_accuarcy));
 
         googleMap.addMarker(marker);
         //googleMap.animateCamera(CameraUpdateFactory.newLatLng(mapLoc));

@@ -26,18 +26,19 @@ public class UserDao {
     }
 
     public void updateUserLocation(User user,double latitude,double longitude,double bearing){
-        mDatabase.getRootReference().child("locations").child(user.getuName()).child("latitude")
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
+                ("latitude")
                 .setValue(latitude);
-        mDatabase.getRootReference().child("locations").child(user.getuName()).child("longitude")
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
+                ("longitude")
                 .setValue(longitude);
-        mDatabase.getRootReference().child("locations").child(user.getuName()).child("bearing")
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child("bearing")
                 .setValue(bearing);
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
+                ("in_a_bus")
+                .setValue(user.isInBus());
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child("route")
+                .setValue(user.getRouteNo());
     }
 
-    public void updateBusRoute(String routeNo, double lat, double longt){
-        mDatabase.getRootReference().child("buses").child(routeNo).child("latitude")
-                .setValue(lat);
-        mDatabase.getRootReference().child("buses").child(routeNo).child("longitude")
-                .setValue(lat);
-    }
 }

@@ -38,10 +38,7 @@ public class HomeNavigationViewModel extends AndroidViewModel {
         UserManager.getInstance().getLoggedUser().setLocation(latitude,longitude);
         mUserDao.updateUserLocation(UserManager.getInstance().getLoggedUser(),latitude,longitude,
                 bearing);
-        //handle the data if user is in a bus
-        if (mUserManager.getLoggedUser().isInBus()){
-            mUserDao.updateBusRoute(mUserManager.getLoggedUser().getRouteNo(),latitude,longitude);
-        }
+
     }
 
 }
