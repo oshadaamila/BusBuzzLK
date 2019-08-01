@@ -9,6 +9,7 @@ public class UserManager {
     private static UserManager instance;
     private User loggedUser;
 
+
     private UserManager(){
 
     }
@@ -37,6 +38,13 @@ public class UserManager {
 
     public User getLoggedUser(){
         return loggedUser;
+    }
+
+    public void addToBus(String routeNo){
+        BusManager busManager = new BusManager();
+        busManager.addUserToBus(loggedUser.getuName(),routeNo,loggedUser.getLatitude(),loggedUser
+                .getLongitude());
+
     }
 
 

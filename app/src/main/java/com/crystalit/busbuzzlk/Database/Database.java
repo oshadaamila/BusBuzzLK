@@ -15,7 +15,7 @@ public class Database {
     private Database() {
         firebaseDatabase = FirebaseDatabase.getInstance();
         geoUserInstance = new GeoFire(firebaseDatabase.getReference("geo_user_locations"));
-        geoBusInstance = new GeoFire(firebaseDatabase.getReference("get_bus_locations"));
+        geoBusInstance = new GeoFire(firebaseDatabase.getReference("geo_bus_locations"));
     }
 
     public static Database getInstance() {
@@ -37,6 +37,7 @@ public class Database {
         return geoUserInstance;
     }
 
-
-
+    public GeoFire getGeoBusInstance() {
+        return geoBusInstance;
+    }
 }

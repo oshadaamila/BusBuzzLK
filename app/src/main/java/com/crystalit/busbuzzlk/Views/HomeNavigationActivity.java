@@ -303,6 +303,7 @@ public class HomeNavigationActivity extends AppCompatActivity
             case ON_BUS_FRAGMENT:
                 OnBusFragment onBusFragment = new OnBusFragment();
                 fragmentTransaction.replace(R.id.fragment_container,onBusFragment);
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
         }
 

@@ -3,10 +3,13 @@ package com.crystalit.busbuzzlk.Fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.crystalit.busbuzzlk.R;
 
@@ -29,6 +32,9 @@ public class OnBusFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private Button updateButton;
+    private EditText routeNo;
 
     public OnBusFragment() {
         // Required empty public constructor
@@ -65,7 +71,17 @@ public class OnBusFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_on_bus, container, false);
+        View view = inflater.inflate(R.layout.fragment_on_bus, container, false);
+        updateButton = view.findViewById(R.id.update_button);
+        routeNo = view.findViewById(R.id.routeNoEditText);
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addUserToBus();
+            }
+        });
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -105,5 +121,11 @@ public class OnBusFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void addUserToBus(){
+        String routeNo = this.routeNo.getText().toString();
+        com.crystalit.busbuzzlk.Components.UserManager.getInstance().addToBus(routeNo);
+
     }
 }

@@ -53,4 +53,12 @@ public class User {
     public void setRouteNo(String routeNo) {
         this.routeNo = routeNo;
     }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 }
