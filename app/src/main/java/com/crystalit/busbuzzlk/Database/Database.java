@@ -33,6 +33,10 @@ public class Database {
         return firebaseDatabase.getReference("Users");
     }
 
+    public DatabaseReference getBusReference() {
+        return firebaseDatabase.getReference("buses");
+    }
+
     public GeoFire getGeoUserInstance(){
         return geoUserInstance;
     }

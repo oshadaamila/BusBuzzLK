@@ -21,5 +21,23 @@ public class Bus {
         this.longitude = longitude;
     }
 
+    public String getId() {
+        return id;
+    }
 
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public String getRouteID() {
+        return routeID;
+    }
+
+    public Double getBearing() {
+        return bearing;
+    }
 }
