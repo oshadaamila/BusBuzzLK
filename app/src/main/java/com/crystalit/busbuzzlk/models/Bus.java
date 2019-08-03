@@ -5,14 +5,12 @@ public class Bus {
     String id;
     Double latitude,longitude;
     String routeID;
-    Double bearing;
 
-    public Bus(String id, Double latitude, Double longitude, String routeID, Double bearing) {
+    public Bus(String id, Double latitude, Double longitude, String routeID) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.routeID = routeID;
-        this.bearing = bearing;
     }
 
     public Bus(String id,Double latitude,Double longitude){
@@ -37,7 +35,5 @@ public class Bus {
         return routeID;
     }
 
-    public Double getBearing() {
-        return bearing;
-    }
+
 }

@@ -5,6 +5,7 @@ import android.util.Log;
 import com.crystalit.busbuzzlk.Database.Dao.BusDao;
 import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.models.Bus;
+import com.crystalit.busbuzzlk.models.User;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
@@ -62,20 +63,29 @@ public class BusManager {
     private void selectTheBus(Double latitude, Double longitude, List<Bus> busList, String userId,
                               String routeNo) {
         Log.d("after geoquery","Buses Received"+Integer.toString(busList.size()));
+
         if (busList.size() == 0 && busList != null) {
-            Bus bus = createNewBus(latitude, longitude, userId, routeNo);
+            //create a new bus
+            Bus bus = createNewBus(latitude, longitude, routeNo);
+            UserManager.getInstance().setCurrentBus(bus);
+            UserManager.getInstance().getLoggedUser().setInBus(true);
+            UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
+            //this will add new bus to the database
             busDao.addNewBusToDatabase(bus);
+            //register the bus in usermanager
+            UserManager.getInstance().setCurrentBus(bus);
 
         } else if (busList.size() > 0) {
-
+            int a  = busList.size();
+            int x =0;
         } else {
             Log.e("error at geo_fire", "getBusesWithinRange return a null list");
         }
     }
 
-    private Bus createNewBus(Double latitude, Double longitude, String userId, String routeNo) {
+    private Bus createNewBus(Double latitude, Double longitude, String routeNo) {
         String busId = createNewBusId();
-        Bus bus = new Bus(busId, latitude, longitude, routeNo, 0.0);
+        Bus bus = new Bus(busId, latitude, longitude, routeNo);
         return bus;
     }
 

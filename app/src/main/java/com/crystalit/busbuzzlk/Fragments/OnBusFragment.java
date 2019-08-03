@@ -125,7 +125,7 @@ public class OnBusFragment extends Fragment {
 
     private void addUserToBus(){
         String routeNo = this.routeNo.getText().toString();
-        com.crystalit.busbuzzlk.Components.UserManager.getInstance().addToBus(routeNo);
+        com.crystalit.busbuzzlk.Components.UserManager.getInstance().addUserToaBus(routeNo);
 
     }
 }

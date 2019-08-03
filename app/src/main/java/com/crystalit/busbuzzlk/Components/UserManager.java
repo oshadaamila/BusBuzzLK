@@ -2,11 +2,13 @@ package com.crystalit.busbuzzlk.Components;
 
 import android.content.Context;
 
+import com.crystalit.busbuzzlk.models.Bus;
 import com.crystalit.busbuzzlk.models.User;
 
 public class UserManager {
 
     private static UserManager instance;
+    private Bus currentBus;
     private User loggedUser;
 
 
@@ -40,12 +42,25 @@ public class UserManager {
         return loggedUser;
     }
 
-    public void addToBus(String routeNo){
+    public void addUserToaBus(String routeNo){
         BusManager busManager = new BusManager();
         busManager.addUserToBus(loggedUser.getuName(),routeNo,loggedUser.getLatitude(),loggedUser
                 .getLongitude());
 
     }
+
+    public void setCurrentBus(Bus bus){
+        this.currentBus = bus;
+        loggedUser.setInBus(true);
+        loggedUser.setRouteNo(bus.getRouteID());
+    }
+
+    public Bus getCurrentBus(){
+        return currentBus;
+    }
+
+
+
 
 
 

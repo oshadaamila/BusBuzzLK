@@ -79,6 +79,7 @@ public class HomeOptionsFragment extends Fragment {
             public void onClick(View v) {
                 HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
                 activity.showSearchFragment();
+                activity.getNearestBusesGeoFire();
             }
         });
         busInfoButton.setOnClickListener(new View.OnClickListener() {

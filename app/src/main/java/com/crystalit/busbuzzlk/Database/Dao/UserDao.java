@@ -26,6 +26,7 @@ public class UserDao {
         mDatabase.getUsersReference().child(userName).addListenerForSingleValueEvent(userValueLIstener);
     }
 
+    //this method updates both user_locations and geo_user_locations
     public void updateUserLocation(User user,double latitude,double longitude,double bearing){
         mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
                 ("latitude")

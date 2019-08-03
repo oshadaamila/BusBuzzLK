@@ -5,6 +5,7 @@ public class User {
     private String uName, password, email,routeNo;
     private double latitude=0.0;
     private double longitude=0.0;
+    private double bearing = 0.0;
     private boolean inBus=false;
 
 
@@ -30,7 +31,7 @@ public class User {
         return uName;
     }
 
-    public void setLocation(double latitude, double longitude){
+    public void setLocation(double latitude, double longitude,double bearing){
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -44,7 +45,7 @@ public class User {
     }
 
     public String getRouteNo() {
-        if (routeNo.isEmpty()){
+        if (routeNo == null ){
             return "0";
         }
         return routeNo;
@@ -60,5 +61,9 @@ public class User {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public double getBearing() {
+        return bearing;
     }
 }
