@@ -25,7 +25,7 @@ public class BusManager {
 
     public BusManager() {
         busDao = new BusDao();
-        nearestBusesFromFirebase = new ArrayList<Bus>();
+        this.nearestBusesFromFirebase = new ArrayList<Bus>();
     }
 
     private void getBusesWithinRange(final Double latitude, final Double longitude, final String
@@ -75,7 +75,6 @@ public class BusManager {
         if (busList.size() == 0 && busList != null) {
             //create a new bus
             Bus bus = createNewBus(latitude, longitude, routeNo);
-
             //this will add new bus to the database
             busDao.addNewBusToDatabase(bus);
             //register the bus in usermanager
@@ -104,7 +103,7 @@ public class BusManager {
         return Long.toString(timeStamp);
     }
 
-    private void getBusesFromFireBase(List<Bus> busKeysFromGeoFire, String currentRouteNo) {
+    private void getBusesFromFireBase(List<Bus> busKeysFromGeoFire, final String currentRouteNo) {
 
         for (Bus bus : busKeysFromGeoFire) {
             String key = bus.getId();
@@ -127,10 +126,16 @@ public class BusManager {
                     Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
                             routeId);
                     bus.setBearing(Double.parseDouble(bearing));
-                    nearestBusesFromFirebase.add(bus);
+                    boolean userInBus = userInTheGivenBus(bus, bearing, currentRouteNo);
+                    if (userInBus) {
+                        busDao.registerTravellerToBus(bus.getId(), UserManager.getInstance()
+                                .getLoggedUser().getuName(), UserManager.getInstance()
+                                .getLoggedUser().getBearing());
+                        UserManager.getInstance().setCurrentBus(bus);
+                        UserManager.getInstance().getLoggedUser().setInBus(true);
+                        UserManager.getInstance().getLoggedUser().setRouteNo(bus.getRouteID());
 
-
-
+                    }
 
                 }
 
@@ -144,28 +149,15 @@ public class BusManager {
 
     }
 
-    private boolean userInTheGivenBus(Bus bus, String bearing) {
+
+    private boolean userInTheGivenBus(Bus bus, String bearing, String userGivenRoute) {
         Double bus_lat = bus.getLatitude();
         Double bus_lng = bus.getLongitude();
         Double bus_bearing = Double.parseDouble(bearing);
         Double user_lat = UserManager.getInstance().getLoggedUser().getLatitude();
         Double user_lng = UserManager.getInstance().getLoggedUser().getLongitude();
         Double user_bearing = UserManager.getInstance().getLoggedUser().getBearing();
-        return true;
-    }
-
-    private void selectBusFromNearestBuses(String routeId) {
-        if (nearestBusesFromFirebase.size() == 1) {
-            Bus nearestBus = nearestBusesFromFirebase.get(0);
-            if (nearestBus.getId().equals(routeId)) {
-
-            } else {
-                
-            }
-
-        } else {
-
-        }
+        return userGivenRoute.equals(bus.getRouteID());
     }
 
 
