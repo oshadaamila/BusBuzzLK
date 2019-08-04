@@ -5,6 +5,7 @@ public class Bus {
     String id;
     Double latitude,longitude;
     String routeID;
+    Double bearing = 0.0;
 
     public Bus(String id, Double latitude, Double longitude, String routeID) {
         this.id = id;
@@ -35,5 +36,11 @@ public class Bus {
         return routeID;
     }
 
+    public Double getBearing() {
+        return bearing;
+    }
 
+    public void setBearing(Double bearing) {
+        this.bearing = bearing;
+    }
 }

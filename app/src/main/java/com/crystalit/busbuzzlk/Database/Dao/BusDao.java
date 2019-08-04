@@ -39,4 +39,10 @@ public class BusDao {
                 longitude));
     }
 
+    public void registerTravellerToBus(String busId, String userName, Double bearing) {
+        Database database = Database.getInstance();
+        database.getBusReference().child(busId).child("travellers").child(userName).child
+                ("bearing").setValue(bearing);
+    }
+
 }

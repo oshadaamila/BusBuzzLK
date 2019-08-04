@@ -368,7 +368,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(0000);
+        mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
@@ -384,7 +384,6 @@ public class HomeNavigationActivity extends AppCompatActivity
                 for (Location location : locationResult.getLocations()) {
                     // Update UI with location data
                     bearing = location.getBearing();
-                    bearing_accuarcy = location.getBearingAccuracyDegrees();
                     mViewModel.updateLocationToDatabase(location.getLatitude(),location
                             .getLongitude(),location.getBearing());
                     updateMap(location,true);

@@ -21,15 +21,20 @@ import java.util.List;
 public class BusManager {
 
     BusDao busDao;
+    List<Bus> nearestBusesFromFirebase;
 
     public BusManager() {
         busDao = new BusDao();
+        nearestBusesFromFirebase = new ArrayList<Bus>();
     }
 
-    public void getBusesWithinRange(final Double latitude, final Double longitude, final String userId, final String routeNo) {
+    private void getBusesWithinRange(final Double latitude, final Double longitude, final String
+            userId, final String routeNo) {
         final List<Bus> busList = new ArrayList<Bus>();
+
         GeoQuery geoQuery = Database.getInstance().getGeoBusInstance().queryAtLocation(new
                 GeoLocation(latitude,longitude),0.01);
+
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
@@ -70,16 +75,16 @@ public class BusManager {
         if (busList.size() == 0 && busList != null) {
             //create a new bus
             Bus bus = createNewBus(latitude, longitude, routeNo);
-            UserManager.getInstance().setCurrentBus(bus);
-            UserManager.getInstance().getLoggedUser().setInBus(true);
-            UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
+
             //this will add new bus to the database
             busDao.addNewBusToDatabase(bus);
             //register the bus in usermanager
             UserManager.getInstance().setCurrentBus(bus);
+            UserManager.getInstance().getLoggedUser().setInBus(true);
+            UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
 
         } else if (busList.size() > 0) {
-            getBusesFromFireBase(busList);
+            getBusesFromFireBase(busList, routeNo);
 
         } else {
             Log.e("error at geo_fire", "getBusesWithinRange return a null list");
@@ -99,7 +104,7 @@ public class BusManager {
         return Long.toString(timeStamp);
     }
 
-    private void getBusesFromFireBase(List<Bus> busKeysFromGeoFire) {
+    private void getBusesFromFireBase(List<Bus> busKeysFromGeoFire, String currentRouteNo) {
 
         for (Bus bus : busKeysFromGeoFire) {
             String key = bus.getId();
@@ -121,6 +126,10 @@ public class BusManager {
                             .child("bearing").getValue().toString();
                     Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
                             routeId);
+                    bus.setBearing(Double.parseDouble(bearing));
+                    nearestBusesFromFirebase.add(bus);
+
+
 
 
                 }
@@ -132,10 +141,32 @@ public class BusManager {
             });
         }
 
+
     }
 
     private boolean userInTheGivenBus(Bus bus, String bearing) {
+        Double bus_lat = bus.getLatitude();
+        Double bus_lng = bus.getLongitude();
+        Double bus_bearing = Double.parseDouble(bearing);
+        Double user_lat = UserManager.getInstance().getLoggedUser().getLatitude();
+        Double user_lng = UserManager.getInstance().getLoggedUser().getLongitude();
+        Double user_bearing = UserManager.getInstance().getLoggedUser().getBearing();
         return true;
-
     }
+
+    private void selectBusFromNearestBuses(String routeId) {
+        if (nearestBusesFromFirebase.size() == 1) {
+            Bus nearestBus = nearestBusesFromFirebase.get(0);
+            if (nearestBus.getId().equals(routeId)) {
+
+            } else {
+                
+            }
+
+        } else {
+
+        }
+    }
+
+
 }
