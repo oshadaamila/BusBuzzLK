@@ -1,5 +1,6 @@
 package com.crystalit.busbuzzlk.Components;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.crystalit.busbuzzlk.Database.Dao.BusDao;
@@ -8,7 +9,10 @@ import com.crystalit.busbuzzlk.models.Bus;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,14 +79,7 @@ public class BusManager {
             UserManager.getInstance().setCurrentBus(bus);
 
         } else if (busList.size() > 0) {
-            Bus bus = createNewBus(latitude, longitude, routeNo);
-            UserManager.getInstance().setCurrentBus(bus);
-            UserManager.getInstance().getLoggedUser().setInBus(true);
-            UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
-            //this will add new bus to the database
-            busDao.addNewBusToDatabase(bus);
-            //register the bus in usermanager
-            UserManager.getInstance().setCurrentBus(bus);
+            getBusesFromFireBase(busList);
 
         } else {
             Log.e("error at geo_fire", "getBusesWithinRange return a null list");
@@ -100,5 +97,45 @@ public class BusManager {
         Date date = new Date();
         long timeStamp = date.getTime();
         return Long.toString(timeStamp);
+    }
+
+    private void getBusesFromFireBase(List<Bus> busKeysFromGeoFire) {
+
+        for (Bus bus : busKeysFromGeoFire) {
+            String key = bus.getId();
+            Log.d("tagfordebug", "getBusesFromFireBase:" + key);
+            DatabaseReference ref = Database.getInstance().getBusReference().child(key);
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String id = dataSnapshot.child("id").getValue().toString();
+                    String lat = dataSnapshot.child("latitude").getValue().toString();
+                    String lng = dataSnapshot.child("longitude").getValue().toString();
+                    String routeId = dataSnapshot.child("routeID").getValue().toString();
+                    List<String> travellers = new ArrayList<String>();
+                    Iterable<DataSnapshot> ds = dataSnapshot.child("travellers").getChildren();
+                    for (DataSnapshot child : ds) {
+                        travellers.add(child.getKey());
+                    }
+                    String bearing = dataSnapshot.child("travellers").child(travellers.get(0))
+                            .child("bearing").getValue().toString();
+                    Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
+                            routeId);
+
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+    }
+
+    private boolean userInTheGivenBus(Bus bus, String bearing) {
+        return true;
+
     }
 }
