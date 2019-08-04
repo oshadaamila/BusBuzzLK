@@ -16,10 +16,10 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -160,17 +160,17 @@ public class HomeNavigationActivity extends AppCompatActivity
         Log.d("tagfordebug", "onCreate: started");
         this.mViewModel = ViewModelProviders.of(this).get(HomeNavigationViewModel.class);
         setContentView(R.layout.activity_home_navigation);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         fragmentManager = getSupportFragmentManager();
@@ -202,7 +202,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -255,7 +255,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -368,7 +368,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
+        mLocationRequest.setInterval(0000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
@@ -456,10 +456,11 @@ public class HomeNavigationActivity extends AppCompatActivity
     }
 
     public void getNearestBusesGeoFire(){
+        busKeysFromGeoFire.clear();
         Double lat = UserManager.getInstance().getLoggedUser().getLatitude();
         Double lng = UserManager.getInstance().getLoggedUser().getLongitude();
        GeoQuery geoQuery =  Database.getInstance().getGeoBusInstance().queryAtLocation(new
-               GeoLocation(lat,lng),1.0);
+               GeoLocation(lat, lng), 0.1);
        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
            @Override
            public void onKeyEntered(String key, GeoLocation location) {
@@ -475,7 +476,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
            @Override
            public void onKeyMoved(String key, GeoLocation location) {
-
+               getBusesFromFireBase();
            }
 
            @Override
@@ -507,7 +508,7 @@ public class HomeNavigationActivity extends AppCompatActivity
                         String routeId = dataSnapshot.child("routeID").getValue().toString();
                         Bus bus = new Bus(id,Double.parseDouble(lat),Double.parseDouble(lng),
                                 routeId);
-                        busList.add(bus);
+                    updateBusList(bus);
 
                 }
 
@@ -518,6 +519,19 @@ public class HomeNavigationActivity extends AppCompatActivity
             });
         }
 
+    }
+
+    private void updateBusList(Bus bus) {
+        String busId = bus.getId();
+        for (int i = 0; i < busList.size(); i++) {
+            if (busList.get(i).getId().equals(busId)) {
+                busList.remove(i);
+                busList.add(bus);
+                return;
+            }
+        }
+        busList.add(bus);
+        return;
     }
 
 

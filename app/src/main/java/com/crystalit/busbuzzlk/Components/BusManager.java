@@ -5,7 +5,6 @@ import android.util.Log;
 import com.crystalit.busbuzzlk.Database.Dao.BusDao;
 import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.models.Bus;
-import com.crystalit.busbuzzlk.models.User;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
@@ -76,8 +75,15 @@ public class BusManager {
             UserManager.getInstance().setCurrentBus(bus);
 
         } else if (busList.size() > 0) {
-            int a  = busList.size();
-            int x =0;
+            Bus bus = createNewBus(latitude, longitude, routeNo);
+            UserManager.getInstance().setCurrentBus(bus);
+            UserManager.getInstance().getLoggedUser().setInBus(true);
+            UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
+            //this will add new bus to the database
+            busDao.addNewBusToDatabase(bus);
+            //register the bus in usermanager
+            UserManager.getInstance().setCurrentBus(bus);
+
         } else {
             Log.e("error at geo_fire", "getBusesWithinRange return a null list");
         }
