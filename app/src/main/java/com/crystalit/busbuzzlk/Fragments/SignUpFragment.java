@@ -80,7 +80,7 @@ public class SignUpFragment extends Fragment {
             valid = false;
             passwordET.setError("Password should be 8-16 characters");
         }
-        if (password!=confirmPassword) {
+        if (!password.equals(confirmPassword)) {
             valid = false;
             confirmPasswordET.setError("Password mismatch");
         }
