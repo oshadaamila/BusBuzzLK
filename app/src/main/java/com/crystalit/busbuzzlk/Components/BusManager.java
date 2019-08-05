@@ -9,6 +9,7 @@ import com.crystalit.busbuzzlk.models.Bus;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,10 +23,11 @@ public class BusManager {
 
     BusDao busDao;
     List<Bus> nearestBusesFromFirebase;
+    int iter = 0;
 
     public BusManager() {
         busDao = new BusDao();
-        nearestBusesFromFirebase = new ArrayList<Bus>();
+        this.nearestBusesFromFirebase = new ArrayList<Bus>();
     }
 
     private void getBusesWithinRange(final Double latitude, final Double longitude, final String
@@ -75,7 +77,6 @@ public class BusManager {
         if (busList.size() == 0 && busList != null) {
             //create a new bus
             Bus bus = createNewBus(latitude, longitude, routeNo);
-
             //this will add new bus to the database
             busDao.addNewBusToDatabase(bus);
             //register the bus in usermanager
@@ -104,9 +105,11 @@ public class BusManager {
         return Long.toString(timeStamp);
     }
 
-    private void getBusesFromFireBase(List<Bus> busKeysFromGeoFire, String currentRouteNo) {
-
-        for (Bus bus : busKeysFromGeoFire) {
+    private void getBusesFromFireBase(final List<Bus> busKeysFromGeoFire, final String currentRouteNo) {
+        iter = 0;
+        for (int i = 0; i < busKeysFromGeoFire.size(); i++) {
+            iter = i;
+            Bus bus = busKeysFromGeoFire.get(i);
             String key = bus.getId();
             Log.d("tagfordebug", "getBusesFromFireBase:" + key);
             DatabaseReference ref = Database.getInstance().getBusReference().child(key);
@@ -127,10 +130,18 @@ public class BusManager {
                     Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
                             routeId);
                     bus.setBearing(Double.parseDouble(bearing));
-                    nearestBusesFromFirebase.add(bus);
+                    boolean userInBus = userInTheGivenBus(bus, bearing, currentRouteNo);
+                    if (userInBus) {
+                        busDao.registerTravellerToBus(bus.getId(), UserManager.getInstance()
+                                .getLoggedUser().getuName(), UserManager.getInstance()
+                                .getLoggedUser().getBearing());
+                        UserManager.getInstance().setCurrentBus(bus);
+                        UserManager.getInstance().getLoggedUser().setInBus(true);
+                        UserManager.getInstance().getLoggedUser().setRouteNo(bus.getRouteID());
 
-
-
+                    } else if (iter == (busKeysFromGeoFire.size() - 1)) {
+                        //all bus checked
+                    }
 
                 }
 
@@ -144,28 +155,30 @@ public class BusManager {
 
     }
 
-    private boolean userInTheGivenBus(Bus bus, String bearing) {
+
+    private boolean userInTheGivenBus(Bus bus, String bearing, String userGivenRoute) {
         Double bus_lat = bus.getLatitude();
         Double bus_lng = bus.getLongitude();
         Double bus_bearing = Double.parseDouble(bearing);
         Double user_lat = UserManager.getInstance().getLoggedUser().getLatitude();
         Double user_lng = UserManager.getInstance().getLoggedUser().getLongitude();
         Double user_bearing = UserManager.getInstance().getLoggedUser().getBearing();
-        return true;
+        if (userGivenRoute.equals(bus.getRouteID())) {
+            return true;
+        } else
+            return isLatLangsWithingRange(new LatLng(bus_lat, bus_lng), new LatLng(user_lat, user_lng),
+                    bus_bearing);
     }
 
-    private void selectBusFromNearestBuses(String routeId) {
-        if (nearestBusesFromFirebase.size() == 1) {
-            Bus nearestBus = nearestBusesFromFirebase.get(0);
-            if (nearestBus.getId().equals(routeId)) {
+    //length,width of a bus is taken as 14,2.5 metres
+    private boolean isLatLangsWithingRange(LatLng bus, LatLng user, Double bearing) {
+        double bearin_rad = Math.toRadians(bearing);
+        Double lng_range = 14 * Math.sin(bearin_rad) + 2.5 * Math.cos(bearin_rad);
+        Double lat_range = 14 * Math.cos(bearin_rad) + 2.5 * Math.sin(bearin_rad);
+        Double dist_between_lats = Math.abs(bus.latitude - user.latitude) * 111000;
+        Double dist_between_lngs = Math.abs(bus.longitude - user.longitude) * 110000;
+        return true;
 
-            } else {
-                
-            }
-
-        } else {
-
-        }
     }
 
 
