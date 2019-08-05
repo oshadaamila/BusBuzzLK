@@ -1,6 +1,8 @@
 package com.crystalit.busbuzzlk.Components;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 
 import com.crystalit.busbuzzlk.models.Bus;
 import com.crystalit.busbuzzlk.models.User;
@@ -42,10 +44,10 @@ public class UserManager {
         return loggedUser;
     }
 
-    public void addUserToaBus(String routeNo){
+    public void addUserToaBus(FragmentManager fm, ProgressDialog pd) {
         BusManager busManager = new BusManager();
-        busManager.addUserToBus(loggedUser.getuName(),routeNo,loggedUser.getLatitude(),loggedUser
-                .getLongitude());
+        busManager.addUserToBus(loggedUser.getuName(), fm, loggedUser.getLatitude(), loggedUser
+                .getLongitude(), pd);
 
     }
 
