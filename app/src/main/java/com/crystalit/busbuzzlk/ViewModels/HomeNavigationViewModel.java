@@ -2,13 +2,11 @@ package com.crystalit.busbuzzlk.ViewModels;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.crystalit.busbuzzlk.Components.UserManager;
 import com.crystalit.busbuzzlk.Database.Dao.BusDao;
 import com.crystalit.busbuzzlk.Database.Dao.UserDao;
-import com.google.android.gms.tasks.Task;
 
 public class HomeNavigationViewModel extends AndroidViewModel {
 
@@ -27,9 +25,6 @@ public class HomeNavigationViewModel extends AndroidViewModel {
         mUserManager.logOutUser(getApplication().getApplicationContext());
     }
 
-    //public Task<Location> updateMapOnCreate(){
-      // return locationProvider.getLastLocation();
-    //}
 
     public void updateLocationToDatabase(double latitude,double longitude,double bearing){
         UserManager.getInstance().getLoggedUser().setLocation(latitude,longitude,bearing);

@@ -30,7 +30,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -353,7 +352,7 @@ public class HomeNavigationActivity extends AppCompatActivity
                 fragmentTransaction.commit();
                 break;
             case ON_BUS_FRAGMENT:
-                OnBusFragment onBusFragment = new OnBusFragment();
+                OnBusFragment onBusFragment = OnBusFragment.newInstance("null", "null");
                 fragmentTransaction.replace(R.id.fragment_container, onBusFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
