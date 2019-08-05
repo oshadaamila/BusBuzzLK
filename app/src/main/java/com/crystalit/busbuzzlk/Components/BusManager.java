@@ -43,7 +43,7 @@ public class BusManager {
         final List<String> busList = new ArrayList<String>();
 
         GeoQuery geoQuery = Database.getInstance().getGeoBusInstance().queryAtLocation(new
-                GeoLocation(latitude, longitude), 0.02);
+                GeoLocation(latitude, longitude), 0.01);
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
