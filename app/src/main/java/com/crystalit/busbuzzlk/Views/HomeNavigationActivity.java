@@ -546,13 +546,15 @@ public class HomeNavigationActivity extends AppCompatActivity
             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
                         String id = dataSnapshot.child("id").getValue().toString();
                         String lat = dataSnapshot.child("latitude").getValue().toString();
                         String lng = dataSnapshot.child("longitude").getValue().toString();
                         String routeId = dataSnapshot.child("routeID").getValue().toString();
-                        Bus bus = new Bus(id,Double.parseDouble(lat),Double.parseDouble(lng),
+                        Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
                                 routeId);
-                    updateBusList(bus);
+                        updateBusList(bus);
+                    }
 
                 }
 

@@ -203,6 +203,8 @@ public class SelectBusDialog extends DialogFragment {
             UserManager.getInstance().getLoggedUser().setRouteNo(selectedRoute);
 
         }
+        this.dismiss();
+
 
     }
 

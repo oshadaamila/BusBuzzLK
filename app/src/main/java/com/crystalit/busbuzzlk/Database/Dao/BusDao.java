@@ -50,4 +50,10 @@ public class BusDao {
         database.getBusReference().child(busId).child("travellers").child(uname).setValue(null);
     }
 
+    public void removeBus(String busId) {
+        Database database = Database.getInstance();
+        database.getBusReference().child(busId).setValue(null);
+        database.getGeoBusInstance().removeLocation(busId);
+    }
+
 }
