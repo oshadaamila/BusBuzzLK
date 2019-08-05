@@ -3,7 +3,10 @@ package com.crystalit.busbuzzlk.Views;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -20,23 +23,27 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.crystalit.busbuzzlk.Components.UserManager;
+import com.crystalit.busbuzzlk.Const.ServiceParameters;
 import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.Fragments.ETAFragment;
 import com.crystalit.busbuzzlk.Fragments.HomeOptionsFragment;
 import com.crystalit.busbuzzlk.Fragments.OnBusFragment;
 import com.crystalit.busbuzzlk.Fragments.WaitingFragment;
 import com.crystalit.busbuzzlk.R;
+import com.crystalit.busbuzzlk.Services.BackgroundDetectedActivitiesService;
 import com.crystalit.busbuzzlk.ViewModels.HomeNavigationViewModel;
 import com.crystalit.busbuzzlk.models.Bus;
 import com.firebase.geofire.GeoLocation;
@@ -44,6 +51,7 @@ import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -99,6 +107,8 @@ public class HomeNavigationActivity extends AppCompatActivity
     private List<String> busKeysFromGeoFire;
     private List<Bus> busList;
 
+    private BroadcastReceiver broadcastReceiver;
+    private String TAG = HomeNavigationActivity.class.getSimpleName();
 
     enum FragmentType {
         HOME_FRAGMENT, WAITING_FRAGMENT, ETA_FRAGMENT, ON_BUS_FRAGMENT
@@ -112,6 +122,9 @@ public class HomeNavigationActivity extends AppCompatActivity
         } else if (!checkPermissions()) {
             requestPermissions();
         }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(ServiceParameters.getBroadcastDetectedActivity()));
     }
 
     private void requestPermissions() {
@@ -195,8 +208,18 @@ public class HomeNavigationActivity extends AppCompatActivity
         createLocationRequest();
         buildLocationSettingsRequest();
 
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(ServiceParameters.getBroadcastDetectedActivity())) {
+                    int type = intent.getIntExtra("type", -1);
+                    int confidence = intent.getIntExtra("confidence", 0);
+                    handleUserActivity(type, confidence);
+                }
+            }
+        };
 
-
+        startTracking();
     }
 
 
@@ -533,7 +556,77 @@ public class HomeNavigationActivity extends AppCompatActivity
         return;
     }
 
+    // start/stop tracking user activity recognition
+    private void startTracking() {
+        Intent intent1 = new Intent(HomeNavigationActivity.this, BackgroundDetectedActivitiesService.class);
+        startService(intent1);
+    }
 
+    private void stopTracking() {
+        Intent intent = new Intent(HomeNavigationActivity.this, BackgroundDetectedActivitiesService.class);
+        stopService(intent);
+    }
 
+    private void handleUserActivity(int type, int confidence) {
+        boolean possibleBus = false;
+
+        switch (type) {
+            case DetectedActivity.IN_VEHICLE: {
+                possibleBus = true;
+                break;
+            }
+            case DetectedActivity.ON_BICYCLE: {
+                break;
+            }
+            case DetectedActivity.ON_FOOT: {
+                break;
+            }
+            case DetectedActivity.RUNNING: {
+                break;
+            }
+            case DetectedActivity.STILL: {
+                break;
+            }
+            case DetectedActivity.TILTING: {
+                break;
+            }
+            case DetectedActivity.WALKING: {
+                break;
+            }
+            case DetectedActivity.UNKNOWN: {
+                break;
+            }
+        }
+
+        if (confidence > ServiceParameters.getCONFIDENCE()) {
+            //TODO: when changed
+            if (possibleBus) {
+                if (UserManager.getInstance().getLoggedUser().isInBus()) {
+                    // do nothing
+                } else {
+                    this.showBusFragment();
+                }
+            } else {
+                if (UserManager.getInstance().getLoggedUser().isInBus()) {
+                    this.showBusFragment();
+                } else {
+                    // do nothing
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        super.onStop();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(ServiceParameters.getBroadcastDetectedActivity()));
+    }
 
 }
