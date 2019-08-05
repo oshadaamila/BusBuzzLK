@@ -312,7 +312,8 @@ public class HomeNavigationActivity extends AppCompatActivity
 
                 MarkerOptions busMarker = new MarkerOptions().position(new LatLng(bus.getLatitude
                         (),bus.getLongitude()))
-                        .title("Route: "+bus.getRouteID()+" Distance: "+distanceETA.get(0)+"km ETA: "+distanceETA.get(1));
+                        .title("Route: "+bus.getRouteID());
+                busMarker.snippet(" Distance: "+distanceETA.get(0)+"km ETA: "+distanceETA.get(1));
                 int bus_height = 64;
                 int bus_width = 64;
                 BitmapDrawable bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
@@ -682,7 +683,10 @@ public class HomeNavigationActivity extends AppCompatActivity
 
         ArrayList<String> list = new ArrayList<>();
         double distance = Math.abs(displacement[0]) + Math.abs(displacement[1]);
-        list.add(Double.toString(distance));
+        String strDis = String.format("%.3g%n", distance);
+        list.add(strDis);
+
+        String strETA;
 
         if (displacement[0]*bus.getVelocityX()<0 && displacement[1]*bus.getVelocityY()<0) {
             list.add("Bus is going away");
@@ -691,13 +695,16 @@ public class HomeNavigationActivity extends AppCompatActivity
                 list.add("Bus is still");
             } else if (bus.getVelocityX()==0.0) {
                 double eta = displacement[1]*60/bus.getVelocityY();
-                list.add(Double.toString(eta)+" min");
+                strETA = String.format("%.3g%n", eta);
+                list.add(strETA+" min");
             } else if (bus.getVelocityY()==0.0) {
                 double eta = displacement[0]*60/bus.getVelocityX();
-                list.add(Double.toString(eta)+" min");
+                strETA = String.format("%.3g%n", eta);
+                list.add(strETA+" min");
             } else {
                 double eta = displacement[0]*60/bus.getVelocityX() + displacement[1]*60/bus.getVelocityY();
-                list.add(Double.toString(eta)+ "min");
+                strETA = String.format("%.3g%n", eta);
+                list.add(strETA+ "min");
             }
         }
         return list;
