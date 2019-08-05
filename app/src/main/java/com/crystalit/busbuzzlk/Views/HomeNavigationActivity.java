@@ -40,6 +40,7 @@ import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.Fragments.ETAFragment;
 import com.crystalit.busbuzzlk.Fragments.HomeOptionsFragment;
 import com.crystalit.busbuzzlk.Fragments.OnBusFragment;
+import com.crystalit.busbuzzlk.Fragments.SelectBusDialog;
 import com.crystalit.busbuzzlk.Fragments.WaitingFragment;
 import com.crystalit.busbuzzlk.R;
 import com.crystalit.busbuzzlk.Services.BackgroundDetectedActivitiesService;
@@ -82,7 +83,8 @@ import java.util.List;
 public class HomeNavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         HomeOptionsFragment.OnFragmentInteractionListener, WaitingFragment
-                .OnFragmentInteractionListener, OnBusFragment.OnFragmentInteractionListener {
+                .OnFragmentInteractionListener, OnBusFragment.OnFragmentInteractionListener,
+        SelectBusDialog.OnFragmentInteractionListener {
 
     HomeNavigationViewModel mViewModel;
     FragmentManager fragmentManager;
@@ -366,6 +368,10 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     public void showBusFragment() {
         changeFragment(FragmentType.ON_BUS_FRAGMENT);
+    }
+
+    public void showHomeFragment() {
+        changeFragment(FragmentType.HOME_FRAGMENT);
     }
 
 

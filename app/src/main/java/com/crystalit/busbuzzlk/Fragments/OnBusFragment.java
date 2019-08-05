@@ -1,10 +1,12 @@
 package com.crystalit.busbuzzlk.Fragments;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.crystalit.busbuzzlk.R;
+import com.crystalit.busbuzzlk.Views.HomeNavigationActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,7 +36,7 @@ public class OnBusFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private Button updateButton;
+    private Button yesButton, noButton;
     private EditText routeNo;
     private static OnBusFragment instance;
 
@@ -77,12 +80,18 @@ public class OnBusFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_on_bus, container, false);
-        updateButton = view.findViewById(R.id.update_button);
-        routeNo = view.findViewById(R.id.routeNoEditText);
-        updateButton.setOnClickListener(new View.OnClickListener() {
+        yesButton = view.findViewById(R.id.yesButton);
+        noButton = view.findViewById(R.id.no_button);
+        yesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addUserToBus();
+                onYesButtonClicked();
+            }
+        });
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNoButtonClicked();
             }
         });
 
@@ -128,9 +137,38 @@ public class OnBusFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private void addUserToBus(){
-        String routeNo = this.routeNo.getText().toString();
-        com.crystalit.busbuzzlk.Components.UserManager.getInstance().addUserToaBus(routeNo);
+    private void addUserToBus(FragmentManager fm) {
+        ProgressDialog pd = new ProgressDialog(getContext());
+        pd.setTitle("Please wait...");
+        pd.show();
 
+        com.crystalit.busbuzzlk.Components.UserManager.getInstance().addUserToaBus(fm, pd);
+    }
+
+    //user says he is in a bus
+    private void onYesButtonClicked() {
+
+        if (com.crystalit.busbuzzlk.Components.UserManager.getInstance().getLoggedUser().isInBus()) {
+            //do nothing
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+        } else {
+            addUserToBus(getFragmentManager());
+        }
+
+    }
+
+    //user says he is not in a bus
+    private void onNoButtonClicked() {
+
+        if (com.crystalit.busbuzzlk.Components.UserManager.getInstance().getLoggedUser().isInBus()) {
+            //remove the user from current bus
+            com.crystalit.busbuzzlk.Components.UserManager.getInstance().removeUserFromBus();
+        } else {
+            //user is not in a bus
+            //close the fragment
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+        }
     }
 }
