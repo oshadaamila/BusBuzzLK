@@ -263,6 +263,7 @@ public class HomeNavigationActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_logout) {
+            stopTracking();
             mViewModel.logOutUser();
             Intent intent = new Intent(getApplicationContext(), LauncherActivity.class);
             startActivity(intent);
@@ -412,6 +413,20 @@ public class HomeNavigationActivity extends AppCompatActivity
                 for (Location location : locationResult.getLocations()) {
                     // Update UI with location data
                     bearing = location.getBearing();
+
+                    // Get the current bus
+                    Bus currentBus = UserManager.getInstance().getCurrentBus();
+                    // Get old location of the bus
+                    if (currentBus!=null) {
+                        double oldLocLat = currentBus.getLatitude();
+                        double oldLocLong = currentBus.getLongitude();
+
+                        double [] velocity = calculateVelocity(oldLocLat, oldLocLong, location.getLatitude(), location.getLongitude());
+                        currentBus.setVelocityX(velocity[0]);
+                        currentBus.setVelocityY(velocity[1]);
+                    }
+
+
                     mViewModel.updateLocationToDatabase(location.getLatitude(),location
                             .getLongitude(),location.getBearing());
                     updateMap(location,true);
@@ -487,7 +502,7 @@ public class HomeNavigationActivity extends AppCompatActivity
         Double lat = UserManager.getInstance().getLoggedUser().getLatitude();
         Double lng = UserManager.getInstance().getLoggedUser().getLongitude();
        GeoQuery geoQuery =  Database.getInstance().getGeoBusInstance().queryAtLocation(new
-               GeoLocation(lat, lng), 0.1);
+               GeoLocation(lat, lng), 1);
        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
            @Override
            public void onKeyEntered(String key, GeoLocation location) {
@@ -624,7 +639,6 @@ public class HomeNavigationActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-        stopTracking();
         super.onStop();
     }
 
@@ -633,6 +647,24 @@ public class HomeNavigationActivity extends AppCompatActivity
         super.onRestart();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(ServiceParameters.getBroadcastDetectedActivity()));
+    }
+
+    public double[] calculateDistance(double oldLocLat, double oldLocLong, double newLocLat, double newLocLong) {
+        // multiply the difference from 111km/degree to get the approximate distance
+        double displacementX = (newLocLat - oldLocLat)*111;
+        double displacementY = (newLocLong - oldLocLong)*111;
+
+        double [] displacement = {displacementX, displacementY};
+
+        return displacement;
+    }
+
+    public double[] calculateVelocity(double oldLocLat, double oldLocLong, double newLocLat, double newLocLong) {
+        double [] displacement = calculateDistance(oldLocLat, oldLocLong, newLocLat, newLocLong);
+        // calculate velocity at kmph
+        double [] velocity = {displacement[0]*60*60/7.5, displacement[1]*60*60/7.5};
+
+        return velocity;
     }
 
 }
