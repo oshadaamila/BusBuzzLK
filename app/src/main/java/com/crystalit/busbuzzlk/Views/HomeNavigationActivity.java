@@ -619,6 +619,7 @@ public class HomeNavigationActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        stopTracking();
         super.onStop();
     }
 
