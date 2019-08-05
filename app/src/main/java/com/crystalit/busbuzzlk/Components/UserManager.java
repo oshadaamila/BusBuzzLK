@@ -59,6 +59,19 @@ public class UserManager {
         return currentBus;
     }
 
+    //remove currentbus and set inbus to false after removing data from the database
+    public void removeUserFromBus() {
+        String busId = currentBus.getId();
+        BusManager busManager = new BusManager();
+        busManager.removeUserFromBus(busId, UserManager.getInstance().loggedUser.getuName());
+        currentBus = null;
+        UserManager.getInstance().getLoggedUser().setInBus(false);
+        UserManager.getInstance().getLoggedUser().setRouteNo("0");
+
+    }
+
+
+
 
 
 

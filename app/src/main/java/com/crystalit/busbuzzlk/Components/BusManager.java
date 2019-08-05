@@ -24,10 +24,12 @@ public class BusManager {
     BusDao busDao;
     List<Bus> nearestBusesFromFirebase;
     int iter = 0;
+    boolean userAssignedToBus = false;
 
     public BusManager() {
         busDao = new BusDao();
         this.nearestBusesFromFirebase = new ArrayList<Bus>();
+
     }
 
     private void getBusesWithinRange(final Double latitude, final Double longitude, final String
@@ -67,6 +69,7 @@ public class BusManager {
     }
 
     public void addUserToBus(String userId, String routeNo, Double lattiude, Double longitude) {
+        userAssignedToBus = false;
         getBusesWithinRange(lattiude, longitude, userId, routeNo);
     }
 
@@ -83,6 +86,8 @@ public class BusManager {
             UserManager.getInstance().setCurrentBus(bus);
             UserManager.getInstance().getLoggedUser().setInBus(true);
             UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
+            userAssignedToBus = true;
+
 
         } else if (busList.size() > 0) {
             getBusesFromFireBase(busList, routeNo);
@@ -138,9 +143,22 @@ public class BusManager {
                         UserManager.getInstance().setCurrentBus(bus);
                         UserManager.getInstance().getLoggedUser().setInBus(true);
                         UserManager.getInstance().getLoggedUser().setRouteNo(bus.getRouteID());
+                        userAssignedToBus = true;
 
-                    } else if (iter == (busKeysFromGeoFire.size() - 1)) {
-                        //all bus checked
+                    } else if (iter == (busKeysFromGeoFire.size() - 1) && !userAssignedToBus) {
+                        //all bus checked but no bus assigned
+                        //create a new bus
+                        Bus newbus = createNewBus(UserManager.getInstance().getLoggedUser()
+                                        .getLatitude(),
+                                UserManager.getInstance().getLoggedUser().getLongitude(),
+                                currentRouteNo);
+                        //this will add new bus to the database
+                        busDao.addNewBusToDatabase(newbus);
+                        //register the bus in usermanager
+                        UserManager.getInstance().setCurrentBus(newbus);
+                        UserManager.getInstance().getLoggedUser().setInBus(true);
+                        UserManager.getInstance().getLoggedUser().setRouteNo(currentRouteNo);
+                        userAssignedToBus = true;
                     }
 
                 }
@@ -177,7 +195,11 @@ public class BusManager {
         Double lat_range = 14 * Math.cos(bearin_rad) + 2.5 * Math.sin(bearin_rad);
         Double dist_between_lats = Math.abs(bus.latitude - user.latitude) * 111000;
         Double dist_between_lngs = Math.abs(bus.longitude - user.longitude) * 110000;
-        return true;
+        return (dist_between_lngs <= lng_range) || (dist_between_lats <= lat_range);
+    }
+
+    //remove the current user from travellers
+    public void removeUserFromBus(String busId, String uName) {
 
     }
 
