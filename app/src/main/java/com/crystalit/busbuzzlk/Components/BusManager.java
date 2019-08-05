@@ -242,6 +242,8 @@ public class BusManager {
 
     //remove the current user from travellers
     public void removeUserFromBus(String busId, String uName) {
+        busDao.removeUserFromBus(busId, uName);
+
 
     }
 

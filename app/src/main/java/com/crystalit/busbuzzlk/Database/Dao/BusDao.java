@@ -45,4 +45,9 @@ public class BusDao {
                 ("bearing").setValue(bearing);
     }
 
+    public void removeUserFromBus(String busId, String uname) {
+        Database database = Database.getInstance();
+        database.getBusReference().child(busId).child("travellers").child(uname).setValue(null);
+    }
+
 }
