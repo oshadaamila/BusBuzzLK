@@ -304,9 +304,13 @@ public class HomeNavigationActivity extends AppCompatActivity
         if(!busList.isEmpty()) {
             for (Bus bus : busList) {
                 Log.d("tagfordebug", "onMapReady: marker added");
+                //calculate ETA and Manhatton distance
+                ArrayList<String> distanceETA = calculateETA(bus);
+                Log.e(TAG,"route--> "+bus.getRouteID()+" ,distance--> "+distanceETA.get(0)+"km , ETA--> "+distanceETA.get(1)+"\n");
+
                 MarkerOptions busMarker = new MarkerOptions().position(new LatLng(bus.getLatitude
                         (),bus.getLongitude()))
-                        .title(bus.getRouteID());
+                        .title("Route: "+bus.getRouteID()+" Distance: "+distanceETA.get(0)+"km ETA: "+distanceETA.get(1));
                 int bus_height = 64;
                 int bus_width = 64;
                 BitmapDrawable bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
@@ -643,7 +647,7 @@ public class HomeNavigationActivity extends AppCompatActivity
                 new IntentFilter(ServiceParameters.getBroadcastDetectedActivity()));
     }
 
-    public double[] calculateDistance(double oldLocLat, double oldLocLong, double newLocLat, double newLocLong) {
+    public double[] calculateDisplacement(double oldLocLat, double oldLocLong, double newLocLat, double newLocLong) {
         // multiply the difference from 111km/degree to get the approximate distance
         double displacementX = (newLocLat - oldLocLat)*111;
         double displacementY = (newLocLong - oldLocLong)*111;
@@ -654,11 +658,43 @@ public class HomeNavigationActivity extends AppCompatActivity
     }
 
     public double[] calculateVelocity(double oldLocLat, double oldLocLong, double newLocLat, double newLocLong) {
-        double [] displacement = calculateDistance(oldLocLat, oldLocLong, newLocLat, newLocLong);
+        double [] displacement = calculateDisplacement(oldLocLat, oldLocLong, newLocLat, newLocLong);
         // calculate velocity at kmph
         double [] velocity = {displacement[0]*60*60/7.5, displacement[1]*60*60/7.5};
 
         return velocity;
+    }
+
+    public ArrayList<String> calculateETA(Bus bus) {
+        double userLat = UserManager.getInstance().getLoggedUser().getLatitude();
+        double userLong = UserManager.getInstance().getLoggedUser().getLongitude();
+
+        double busLat = bus.getLatitude();
+        double busLong = bus.getLongitude();
+
+        double [] displacement = calculateDisplacement(userLat, userLong, busLat, busLong);
+
+        ArrayList<String> list = new ArrayList<>();
+        double distance = Math.abs(displacement[0]) + Math.abs(displacement[1]);
+        list.add(Double.toString(distance));
+
+        if (displacement[0]*bus.getVelocityX()<0 && displacement[1]*bus.getVelocityY()<0) {
+            list.add("Bus is going away");
+        } else {
+            if(bus.getVelocityX()==0.0 && bus.getVelocityY()==0.0) {
+                list.add("Bus is still");
+            } else if (bus.getVelocityX()==0.0) {
+                double eta = displacement[1]*60/bus.getVelocityY();
+                list.add(Double.toString(eta)+" min");
+            } else if (bus.getVelocityY()==0.0) {
+                double eta = displacement[0]*60/bus.getVelocityX();
+                list.add(Double.toString(eta)+" min");
+            } else {
+                double eta = displacement[0]*60/bus.getVelocityX() + displacement[1]*60/bus.getVelocityY();
+                list.add(Double.toString(eta)+ "min");
+            }
+        }
+        return list;
     }
 
 }
