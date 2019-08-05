@@ -298,8 +298,6 @@ public class HomeNavigationActivity extends AppCompatActivity
         Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
 
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
-        marker.snippet(Double.toString(mapLoc.latitude) + "," + Double.toString(mapLoc.longitude)
-                + ",bearing:" + Float.toString(bearing) + ",bearing_acc:" + Float.toString(bearing_accuarcy));
 
         googleMap.addMarker(marker);
         //googleMap.animateCamera(CameraUpdateFactory.newLatLng(mapLoc));

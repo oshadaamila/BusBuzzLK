@@ -15,14 +15,19 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
+import com.crystalit.busbuzzlk.Components.UserManager;
+import com.crystalit.busbuzzlk.Database.Dao.BusDao;
 import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.R;
+import com.crystalit.busbuzzlk.models.Bus;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,6 +50,7 @@ public class SelectBusDialog extends DialogFragment {
     private List<String> nearestBuses;
     private String[] busIds;
     private ArrayList<String> busRoutes;
+    private ArrayList<Bus> neartBuses;
 
     private AutoCompleteTextView route;
     private Button update;
@@ -59,6 +65,7 @@ public class SelectBusDialog extends DialogFragment {
     public SelectBusDialog(List<String> busKeyList) {
         this.nearestBuses = busKeyList;
         busRoutes = new ArrayList<String>();
+        neartBuses = new ArrayList<Bus>();
         if (nearestBuses != null) {
             busIds = new String[nearestBuses.size()];
             fillValuesToBusRoutes();
@@ -90,7 +97,7 @@ public class SelectBusDialog extends DialogFragment {
         Log.d("tagfordebug", "getBusRoutes busroutes: " + Integer.toString(busRoutes.size()));
 
         Database database = Database.getInstance();
-        for (String busId : busIds) {
+        for (final String busId : busIds) {
             DatabaseReference ref = database.getBusReference().child(busId);
             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -103,10 +110,26 @@ public class SelectBusDialog extends DialogFragment {
                     for (DataSnapshot child : ds) {
                         travellers.add(child.getKey());
                     }
-                    String bearing = dataSnapshot.child("travellers").child(travellers.get(0))
-                            .child("bearing").getValue().toString();
-                    busRoutes.add(routeId);
-                    addSuggestionsToTextView();
+                    String bearing = "0.0";
+                    if (travellers.size() > 0) {
+                        bearing = dataSnapshot.child("travellers").child(travellers.get(0))
+                                .child("bearing").getValue().toString();
+                    }
+
+                    if (isLatLangsWithingRange(new LatLng(Double.parseDouble(lat), Double
+                            .parseDouble(lng)), new
+                            LatLng
+                            (UserManager
+                                    .getInstance().getLoggedUser().getLatitude(), UserManager.getInstance
+                                    ().getLoggedUser().getLongitude()), Double.parseDouble(bearing))) {
+                        Log.d("tagfordebug", "nearestBusFound " + routeId);
+                        busRoutes.add(routeId);
+                        addSuggestionsToTextView();
+                        Bus bus = new Bus(busId, Double.parseDouble(lat), Double.parseDouble(lng),
+                                routeId);
+                        neartBuses.add(bus);
+                    }
+
                 }
 
                 @Override
@@ -140,13 +163,52 @@ public class SelectBusDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_select_bus_dialog, container, false);
         route = view.findViewById(R.id.route_auto_text);
         update = view.findViewById(R.id.update_btn);
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateBusToDatabase();
+            }
+        });
         addSuggestionsToTextView();
         return view;
     }
 
+    private void updateBusToDatabase() {
+        String selectedRoute = route.getText().toString();
+        int selectedIndex = busRoutes.indexOf(selectedRoute);
+        BusDao busDao = new BusDao();
+        Log.d("tagfordebug", "selectedRoute" + selectedRoute + "selectedIndex" + Integer.toString(selectedIndex));
+
+        if (selectedIndex >= 0) {
+            //selected an existing bus
+            Bus currentBus = neartBuses.get(selectedIndex);
+            Log.d("tagfordebug", "busId" + currentBus.getRouteID() + " " + currentBus.getId());
+            busDao.registerTravellerToBus(currentBus.getId(), UserManager.getInstance()
+                    .getLoggedUser().getuName(), UserManager.getInstance()
+                    .getLoggedUser().getBearing());
+            UserManager.getInstance().setCurrentBus(currentBus);
+            UserManager.getInstance().getLoggedUser().setInBus(true);
+            UserManager.getInstance().getLoggedUser().setRouteNo(currentBus.getRouteID());
+
+        } else {
+            //entered a new bus
+            Log.d("tagfordebug", "selected a new bus");
+            Bus bus = createNewBus(UserManager.getInstance().getLoggedUser().getLatitude(),
+                    UserManager.getInstance().getLoggedUser().getLongitude(), selectedRoute);
+            //this will add new bus to the database
+            busDao.addNewBusToDatabase(bus);
+            //register the bus in usermanager
+            UserManager.getInstance().setCurrentBus(bus);
+            UserManager.getInstance().getLoggedUser().setInBus(true);
+            UserManager.getInstance().getLoggedUser().setRouteNo(selectedRoute);
+
+        }
+
+    }
+
     private void addSuggestionsToTextView() {
         if (busIds != null) {
-            Log.d("tagfordebug", "addSuggestionsToTextView: " + Integer.toString(busIds.length));
+            Log.d("tagfordebug", "addSuggestionsToTextView: " + Integer.toString(busRoutes.size()));
             ArrayAdapter<String> routeAdapter = new ArrayAdapter<String>(getContext(), android.R
                     .layout.simple_list_item_1, busRoutes);
             route.setAdapter(routeAdapter);
@@ -191,5 +253,28 @@ public class SelectBusDialog extends DialogFragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    //length,width of a bus is taken as 14,2.5 metres
+    private boolean isLatLangsWithingRange(LatLng bus, LatLng user, Double bearing) {
+        double bearin_rad = Math.toRadians(bearing);
+        Double lng_range = 14 * Math.sin(bearin_rad) + 2.5 * Math.cos(bearin_rad);
+        Double lat_range = 14 * Math.cos(bearin_rad) + 2.5 * Math.sin(bearin_rad);
+        Double dist_between_lats = Math.abs(bus.latitude - user.latitude) * 111000;
+        Double dist_between_lngs = Math.abs(bus.longitude - user.longitude) * 110000;
+        return (dist_between_lngs <= lng_range) || (dist_between_lats <= lat_range);
+    }
+
+    private Bus createNewBus(Double latitude, Double longitude, String routeNo) {
+        String busId = createNewBusId();
+        Bus bus = new Bus(busId, latitude, longitude, routeNo);
+        return bus;
+    }
+
+    //current timestamp will be created as bus_id
+    private String createNewBusId() {
+        Date date = new Date();
+        long timeStamp = date.getTime();
+        return Long.toString(timeStamp);
     }
 }
