@@ -39,12 +39,12 @@
         android:layout_marginEnd="8dp"
         android:cropToPadding="false"
         android:src="@drawable/ic_action_bus"
-        app:layout_constraintEnd_toStartOf="@+id/imageButton3"
+        app:layout_constraintEnd_toStartOf="@+id/profileButton"
         app:layout_constraintStart_toEndOf="@+id/searchIButton"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <ImageButton
-        android:id="@+id/imageButton3"
+        android:id="@+id/profileButton"
         style="@android:style/Widget.ImageButton"
         android:layout_width="75dp"
         android:layout_height="75dp"
