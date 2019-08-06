@@ -241,8 +241,25 @@ public class BusManager {
     }
 
     //remove the current user from travellers
-    public void removeUserFromBus(String busId, String uName) {
+    public void removeUserFromBus(final String busId, String uName) {
         busDao.removeUserFromBus(busId, uName);
+        Database database = Database.getInstance();
+        DatabaseReference ref = database.getBusReference().child(busId);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d("tagfordebug", "onDataChange: removeUserFromBus");
+                if (!dataSnapshot.hasChild("travellers")) {
+                    busDao.removeBus(busId);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
 
     }
