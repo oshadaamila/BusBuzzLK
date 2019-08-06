@@ -306,7 +306,8 @@ public class HomeNavigationActivity extends AppCompatActivity
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.ic_action_person_standing);
         Bitmap b = bitmapdraw.getBitmap();
         Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-
+        marker.snippet(Double.toString(mapLoc.latitude) + "," + Double.toString(mapLoc.longitude)
+                + ",bearing:" + Float.toString(bearing) + ",bearing_acc:" + Float.toString(bearing_accuarcy));
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
 
         googleMap.addMarker(marker);
@@ -633,9 +634,13 @@ public class HomeNavigationActivity extends AppCompatActivity
                         String id = dataSnapshot.child("id").getValue().toString();
                         String lat = dataSnapshot.child("latitude").getValue().toString();
                         String lng = dataSnapshot.child("longitude").getValue().toString();
+                        String velocityX = dataSnapshot.child("velocityX").getValue().toString();
+                        String velocityY = dataSnapshot.child("velocityY").getValue().toString();
                         String routeId = dataSnapshot.child("routeID").getValue().toString();
                         Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
                                 routeId);
+                        bus.setVelocityX(Double.valueOf(velocityX));
+                        bus.setVelocityY(Double.valueOf(velocityY));
                         updateBusList(bus);
                     }
 
@@ -776,16 +781,16 @@ public class HomeNavigationActivity extends AppCompatActivity
             if(bus.getVelocityX()==0.0 && bus.getVelocityY()==0.0) {
                 list.add("Bus is still");
             } else if (bus.getVelocityX()==0.0) {
-                double eta = displacement[1]*60/bus.getVelocityY();
-                strETA = String.format("%.3g%n", eta);
+                double eta = Math.abs(displacement[1]*60/bus.getVelocityY());
+                strETA = String.format("%.3g", eta);
                 list.add(strETA+" min");
             } else if (bus.getVelocityY()==0.0) {
-                double eta = displacement[0]*60/bus.getVelocityX();
-                strETA = String.format("%.3g%n", eta);
+                double eta = Math.abs(displacement[0]*60/bus.getVelocityX());
+                strETA = String.format("%.3g", eta);
                 list.add(strETA+" min");
             } else {
-                double eta = displacement[0]*60/bus.getVelocityX() + displacement[1]*60/bus.getVelocityY();
-                strETA = String.format("%.3g%n", eta);
+                double eta = Math.abs(displacement[0]*60/bus.getVelocityX() + displacement[1]*60/bus.getVelocityY());
+                strETA = String.format("%.3g", eta);
                 list.add(strETA+ "min");
             }
         }
