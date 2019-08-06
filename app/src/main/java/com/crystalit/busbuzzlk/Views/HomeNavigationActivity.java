@@ -592,8 +592,12 @@ public class HomeNavigationActivity extends AppCompatActivity
                         String lat = dataSnapshot.child("latitude").getValue().toString();
                         String lng = dataSnapshot.child("longitude").getValue().toString();
                         String routeId = dataSnapshot.child("routeID").getValue().toString();
+                        String velocityX = dataSnapshot.child("velocityX").getValue().toString();
+                        String velocityY = dataSnapshot.child("velocityY").getValue().toString();
                         Bus bus = new Bus(id, Double.parseDouble(lat), Double.parseDouble(lng),
                                 routeId);
+                        bus.setVelocityX(Double.valueOf(velocityX));
+                        bus.setVelocityY(Double.valueOf(velocityY));
                         updateBusList(bus);
                     }
 

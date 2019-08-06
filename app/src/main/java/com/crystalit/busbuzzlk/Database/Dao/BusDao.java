@@ -32,6 +32,8 @@ public class BusDao {
         Database database = Database.getInstance();
         database.getBusReference().child(bus.getId()).child("latitude").setValue(latitude);
         database.getBusReference().child(bus.getId()).child("longitude").setValue(longitude);
+        database.getBusReference().child(bus.getId()).child("velocityX").setValue(bus.getVelocityX());
+        database.getBusReference().child(bus.getId()).child("velocityY").setValue(bus.getVelocityY());
         database.getBusReference().child(bus.getId()).child("travellers").child(userName).child
                 ("bearing").setValue(bearing);
         //update the geofire bus locations
