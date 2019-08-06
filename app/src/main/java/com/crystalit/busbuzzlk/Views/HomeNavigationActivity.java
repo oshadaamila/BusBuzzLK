@@ -299,18 +299,21 @@ public class HomeNavigationActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
 
         googleMap.clear();
-        MarkerOptions marker = new MarkerOptions().position(mapLoc)
-                .title("Your Location");
-        int height = 120;
-        int width = 120;
-        BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.ic_action_person_standing);
-        Bitmap b = bitmapdraw.getBitmap();
-        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-        marker.snippet(Double.toString(mapLoc.latitude) + "," + Double.toString(mapLoc.longitude)
-                + ",bearing:" + Float.toString(bearing) + ",bearing_acc:" + Float.toString(bearing_accuarcy));
-        marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+        if (!UserManager.getInstance().getLoggedUser().isInBus()) {
+            MarkerOptions marker = new MarkerOptions().position(mapLoc)
+                    .title("Your Location");
+            int height = 120;
+            int width = 120;
+            BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.ic_action_person_standing);
+            Bitmap b = bitmapdraw.getBitmap();
+            Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+            marker.snippet(Double.toString(mapLoc.latitude) + "," + Double.toString(mapLoc.longitude)
+                    + ",bearing:" + Float.toString(bearing) + ",bearing_acc:" + Float.toString(bearing_accuarcy));
+            marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
 
-        googleMap.addMarker(marker);
+            googleMap.addMarker(marker);
+        }
+
         //googleMap.animateCamera(CameraUpdateFactory.newLatLng(mapLoc));
         if(!busList.isEmpty()) {
             for (Bus bus : busList) {
@@ -325,8 +328,22 @@ public class HomeNavigationActivity extends AppCompatActivity
                 busMarker.snippet("Distance: "+distanceETA.get(0)+"\nETA: "+distanceETA.get(1));
                 int bus_height = 64;
                 int bus_width = 64;
-                BitmapDrawable bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
-                        .drawable.blue_bus);
+                BitmapDrawable bus_bitmapdraw;
+                if (UserManager.getInstance().getCurrentBus() != null) {
+                    if (bus.getId().equals(UserManager.getInstance().getCurrentBus().getId())) {
+                        bus_height = 96;
+                        bus_width = 96;
+                        bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
+                                .drawable.green_bus);
+                    } else {
+                        bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
+                                .drawable.blue_bus);
+                    }
+
+                } else {
+                    bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
+                            .drawable.blue_bus);
+                }
                 Bitmap bus_b = bus_bitmapdraw.getBitmap();
                 Bitmap bus_smallMarker = Bitmap.createScaledBitmap(bus_b, bus_width, bus_height,
                         false);
