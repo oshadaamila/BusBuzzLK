@@ -78,8 +78,8 @@ public class HomeOptionsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
-                activity.showSearchFragment();
-                activity.getNearestBusesGeoFire();
+                //activity.showSearchFragment();
+                activity.getNearestBusesGeoFire(getContext());
             }
         });
         busInfoButton.setOnClickListener(new View.OnClickListener() {
@@ -129,5 +129,11 @@ public class HomeOptionsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 }

@@ -37,6 +37,7 @@ public class User {
     }
 
     public boolean isInBus() {
+
         return inBus;
     }
 

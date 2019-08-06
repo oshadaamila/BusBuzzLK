@@ -2,6 +2,7 @@ package com.crystalit.busbuzzlk.Views;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -97,6 +98,7 @@ public class HomeNavigationActivity extends AppCompatActivity
     LatLng mapLoc;
     float bearing, bearing_accuarcy;
     SupportMapFragment mapFragment;
+    ProgressDialog pd;
 
     boolean autoZoom = true;
 
@@ -117,6 +119,8 @@ public class HomeNavigationActivity extends AppCompatActivity
     private BroadcastReceiver broadcastReceiver;
     private String TAG = HomeNavigationActivity.class.getSimpleName();
 
+    private int locationUpdateInterval = 10000;
+
     enum FragmentType {
         HOME_FRAGMENT, WAITING_FRAGMENT, ETA_FRAGMENT, ON_BUS_FRAGMENT
     }
@@ -125,6 +129,7 @@ public class HomeNavigationActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         if (checkPermissions()) {
+            createLocationRequest();
             startLocationUpdates();
         } else if (!checkPermissions()) {
             requestPermissions();
@@ -182,7 +187,6 @@ public class HomeNavigationActivity extends AppCompatActivity
         setContentView(R.layout.activity_home_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -366,6 +370,13 @@ public class HomeNavigationActivity extends AppCompatActivity
                 return info;
             }
         });
+        if (pd != null) {
+            if (pd.isShowing()) {
+                pd.dismiss();
+            }
+
+        }
+
 
     }
 
@@ -440,8 +451,8 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(locationUpdateInterval);
+        mLocationRequest.setFastestInterval(locationUpdateInterval / 2);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -450,6 +461,7 @@ public class HomeNavigationActivity extends AppCompatActivity
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                Log.d("tagfordebug", "onLocationResult: " + Integer.toString(locationUpdateInterval));
                 if (locationResult == null) {
                     return;
                 }
@@ -484,7 +496,7 @@ public class HomeNavigationActivity extends AppCompatActivity
         mLocationSettingsRequest = builder.build();
     }
 
-    private void startLocationUpdates() {
+    public void startLocationUpdates() {
         // Begin by checking if the device has the necessary location settings.
         mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
                 .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
@@ -534,13 +546,43 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     }
 
+    public void slowerLocationUpdates() {
+        //mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        this.locationUpdateInterval = 60000;
+        createLocationRequest();
+        startLocationUpdates();
+    }
+
+    public void fasterLocationUpdates() {
+        //mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        this.locationUpdateInterval = 10000;
+        createLocationRequest();
+        startLocationUpdates();
+    }
+
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
-    public void getNearestBusesGeoFire(){
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("tagfordebug", "onDestroy: activity destroyed");
+        if (UserManager.getInstance().getLoggedUser() != null) {
+            if (UserManager.getInstance().getLoggedUser().isInBus()) {
+                UserManager.getInstance().removeUserFromBus();
+            }
+        }
+
+
+    }
+
+    public void getNearestBusesGeoFire(Context context) {
+        pd = new ProgressDialog(context);
+        pd.setTitle("Searching for buses...");
+        pd.show();
         busKeysFromGeoFire.clear();
         Double lat = UserManager.getInstance().getLoggedUser().getLatitude();
         Double lng = UserManager.getInstance().getLoggedUser().getLongitude();
@@ -561,12 +603,12 @@ public class HomeNavigationActivity extends AppCompatActivity
 
            @Override
            public void onKeyMoved(String key, GeoLocation location) {
-               getBusesFromFireBase();
+               getBusesFromFireBase(pd);
            }
 
            @Override
            public void onGeoQueryReady() {
-                getBusesFromFireBase();
+               getBusesFromFireBase(pd);
 
            }
 
@@ -579,7 +621,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     }
 
-    private void getBusesFromFireBase(){
+    private void getBusesFromFireBase(ProgressDialog pd) {
 
         for (String key:busKeysFromGeoFire) {
             Log.d("tagfordebug", "getBusesFromFireBase:" + key);

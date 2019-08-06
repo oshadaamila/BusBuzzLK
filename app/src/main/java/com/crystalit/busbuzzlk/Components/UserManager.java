@@ -34,6 +34,7 @@ public class UserManager {
     }
 
     public void logOutUser(Context context){
+        removeUserFromBus();
         this.loggedUser = null;
         Settings settings = new Settings(context);
         settings.logOutUser();

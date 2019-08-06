@@ -154,6 +154,9 @@ public class OnBusFragment extends Fragment {
             activity.showHomeFragment();
         } else {
             addUserToBus(getFragmentManager());
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+            activity.startLocationUpdates();
         }
 
     }
@@ -164,6 +167,9 @@ public class OnBusFragment extends Fragment {
         if (com.crystalit.busbuzzlk.Components.UserManager.getInstance().getLoggedUser().isInBus()) {
             //remove the user from current bus
             com.crystalit.busbuzzlk.Components.UserManager.getInstance().removeUserFromBus();
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+            activity.slowerLocationUpdates();
         } else {
             //user is not in a bus
             //close the fragment

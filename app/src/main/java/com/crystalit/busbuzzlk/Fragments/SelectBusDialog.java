@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.crystalit.busbuzzlk.Components.UserManager;
 import com.crystalit.busbuzzlk.Database.Dao.BusDao;
@@ -51,6 +52,8 @@ public class SelectBusDialog extends DialogFragment {
     private String[] busIds;
     private ArrayList<String> busRoutes;
     private ArrayList<Bus> neartBuses;
+
+    private TextView route1, route2, route3;
 
     private AutoCompleteTextView route;
     private Button update;
@@ -161,6 +164,10 @@ public class SelectBusDialog extends DialogFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_select_bus_dialog, container, false);
+        route1 = view.findViewById(R.id.route1_text_view);
+        route2 = view.findViewById(R.id.route2_text_view);
+        route3 = view.findViewById(R.id.route3_text_view);
+
         route = view.findViewById(R.id.route_auto_text);
         update = view.findViewById(R.id.update_btn);
         update.setOnClickListener(new View.OnClickListener() {
@@ -214,8 +221,22 @@ public class SelectBusDialog extends DialogFragment {
             ArrayAdapter<String> routeAdapter = new ArrayAdapter<String>(getContext(), android.R
                     .layout.simple_list_item_1, busRoutes);
             route.setAdapter(routeAdapter);
+            fillTextiews();
         }
 
+    }
+
+    private void fillTextiews() {
+        if (busRoutes.size() >= 3) {
+            route1.setText(busRoutes.get(0));
+            route1.setText(busRoutes.get(1));
+            route1.setText(busRoutes.get(2));
+        } else if (busRoutes.size() == 2) {
+            route1.setText(busRoutes.get(0));
+            route1.setText(busRoutes.get(1));
+        } else if (busRoutes.size() == 1) {
+            route1.setText(busRoutes.get(0));
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
