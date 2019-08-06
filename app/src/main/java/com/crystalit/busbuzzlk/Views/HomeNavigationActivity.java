@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -121,6 +122,9 @@ public class HomeNavigationActivity extends AppCompatActivity
 
     private int locationUpdateInterval = 10000;
 
+    private PowerManager powerManager;
+    private PowerManager.WakeLock wakeLock;
+
     enum FragmentType {
         HOME_FRAGMENT, WAITING_FRAGMENT, ETA_FRAGMENT, ON_BUS_FRAGMENT
     }
@@ -196,6 +200,11 @@ public class HomeNavigationActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire();
 
         fragmentManager = getSupportFragmentManager();
 
@@ -275,6 +284,7 @@ public class HomeNavigationActivity extends AppCompatActivity
         if (id == R.id.nav_logout) {
             stopTracking();
             mViewModel.logOutUser();
+            wakeLock.release();
             Intent intent = new Intent(getApplicationContext(), LauncherActivity.class);
             startActivity(intent);
             finish();
