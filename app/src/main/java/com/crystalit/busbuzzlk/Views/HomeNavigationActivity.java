@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.Uri;
@@ -30,8 +32,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crystalit.busbuzzlk.Components.UserManager;
@@ -311,7 +317,7 @@ public class HomeNavigationActivity extends AppCompatActivity
                 MarkerOptions busMarker = new MarkerOptions().position(new LatLng(bus.getLatitude
                         (),bus.getLongitude()))
                         .title("Route: "+bus.getRouteID());
-                busMarker.snippet(" Distance: "+distanceETA.get(0)+"km ETA: "+distanceETA.get(1));
+                busMarker.snippet("Distance: "+distanceETA.get(0)+"\nETA: "+distanceETA.get(1));
                 int bus_height = 64;
                 int bus_width = 64;
                 BitmapDrawable bus_bitmapdraw = (BitmapDrawable) getResources().getDrawable(R
@@ -329,7 +335,41 @@ public class HomeNavigationActivity extends AppCompatActivity
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapLoc, 16.0f));
         }
 
+        googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+
+                Context mContext = getApplicationContext();
+
+                LinearLayout info = new LinearLayout(mContext);
+                info.setOrientation(LinearLayout.VERTICAL);
+
+                TextView title = new TextView(mContext);
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+
+                TextView snippet = new TextView(mContext);
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+
+                info.addView(title);
+                info.addView(snippet);
+
+                return info;
+            }
+        });
+
     }
+
+
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -681,7 +721,7 @@ public class HomeNavigationActivity extends AppCompatActivity
 
         ArrayList<String> list = new ArrayList<>();
         double distance = Math.abs(displacement[0]) + Math.abs(displacement[1]);
-        String strDis = String.format("%.3g%n", distance);
+        String strDis = String.format("%.3g km", distance);
         list.add(strDis);
 
         String strETA;
