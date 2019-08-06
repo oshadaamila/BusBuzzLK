@@ -86,30 +86,7 @@ public class BusManager {
             userId, FragmentManager fm, ProgressDialog pd) {
         Log.d("tagfordebug", "Buses Received" + Integer.toString(busList.size()));
 
-//        if (busList.size() == 0 && busList != null) {
-//            //create a new bus
-////            Bus bus = createNewBus(latitude, longitude, routeNo);
-////            //this will add new bus to the database
-////            busDao.addNewBusToDatabase(bus);
-////            //register the bus in usermanager
-////            UserManager.getInstance().setCurrentBus(bus);
-////            UserManager.getInstance().getLoggedUser().setInBus(true);
-////            UserManager.getInstance().getLoggedUser().setRouteNo(routeNo);
-////            userAssignedToBus = true;
-//            pd.dismiss();
-//            FragmentTransaction ft = fm.beginTransaction();
-//            Fragment prev = fm.findFragmentByTag("dialog");
-//            if (prev != null) {
-//                ft.remove(prev);
-//            }
-//            ft.addToBackStack(null);
-//            DialogFragment dialogFragment = new SelectBusDialog(nearestBusesFromFirebase);
-//            dialogFragment.show(ft, "dialog");
-//
-//
-//        } else if (busList.size() > 0) {
-//
-//            getBusesFromFireBase(busList, fm,pd);
+
         pd.dismiss();
         FragmentTransaction ft = fm.beginTransaction();
         Fragment prev = fm.findFragmentByTag("dialog");
@@ -168,28 +145,12 @@ public class BusManager {
                     if (userInBus) {
                         Log.d("tagfordebug", "User in bus" + Integer.toString(iter));
                         nearestBusesFromFirebase.add(bus);
-//                        busDao.registerTravellerToBus(bus.getId(), UserManager.getInstance()
-//                                .getLoggedUser().getuName(), UserManager.getInstance()
-//                                .getLoggedUser().getBearing());
-//                        UserManager.getInstance().setCurrentBus(bus);
-//                        UserManager.getInstance().getLoggedUser().setInBus(true);
-//                        UserManager.getInstance().getLoggedUser().setRouteNo(bus.getRouteID());
-//                        userAssignedToBus = true;
+
 
                     } else if (iter == (busKeysFromGeoFire.size() - 1)) {
                         //all bus checked but no bus assigned
                         //create a new bus
-//                        Bus newbus = createNewBus(UserManager.getInstance().getLoggedUser()
-//                                        .getLatitude(),
-//                                UserManager.getInstance().getLoggedUser().getLongitude(),
-//                                currentRouteNo);
-//                        //this will add new bus to the database
-//                        busDao.addNewBusToDatabase(newbus);
-//                        //register the bus in usermanager
-//                        UserManager.getInstance().setCurrentBus(newbus);
-//                        UserManager.getInstance().getLoggedUser().setInBus(true);
-//                        UserManager.getInstance().getLoggedUser().setRouteNo(currentRouteNo);
-//                        userAssignedToBus = true;
+//
                         Log.d("tagfordebug", "iteration_ended");
                         Log.d("tagfordebug", "nearest_buses:" + Integer.toString
                                 (nearestBusesFromFirebase.size()));
@@ -200,9 +161,7 @@ public class BusManager {
                             ft.remove(prev);
                         }
                         ft.addToBackStack(null);
-                        //DialogFragment dialogFragment = new SelectBusDialog
-                        // (nearestBusesFromFirebase);
-                        //dialogFragment.show(ft, "dialog");
+
 
                     }
 

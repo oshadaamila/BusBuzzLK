@@ -20,6 +20,7 @@ import com.crystalit.busbuzzlk.Components.UserManager;
 import com.crystalit.busbuzzlk.Database.Dao.BusDao;
 import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.R;
+import com.crystalit.busbuzzlk.Views.HomeNavigationActivity;
 import com.crystalit.busbuzzlk.models.Bus;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -174,6 +175,8 @@ public class SelectBusDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
                 updateBusToDatabase();
+                HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+                activity.getNearestBusesGeoFire(getContext());
             }
         });
         addSuggestionsToTextView();

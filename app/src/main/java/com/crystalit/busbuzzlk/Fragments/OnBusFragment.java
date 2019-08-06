@@ -170,6 +170,7 @@ public class OnBusFragment extends Fragment {
             HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
             activity.showHomeFragment();
             activity.slowerLocationUpdates();
+            activity.getNearestBusesGeoFire(getContext());
         } else {
             //user is not in a bus
             //close the fragment
