@@ -6,6 +6,7 @@ import com.crystalit.busbuzzlk.Database.Database;
 import com.crystalit.busbuzzlk.Database.ValueListeners.UserValueLIstener;
 import com.crystalit.busbuzzlk.ViewModels.SignInViewModel;
 import com.crystalit.busbuzzlk.models.User;
+import com.firebase.geofire.GeoLocation;
 
 public class UserDao {
 
@@ -24,4 +25,24 @@ public class UserDao {
         UserValueLIstener userValueLIstener = new UserValueLIstener(pd, viewModel);
         mDatabase.getUsersReference().child(userName).addListenerForSingleValueEvent(userValueLIstener);
     }
+
+    //this method updates both user_locations and geo_user_locations
+    public void updateUserLocation(User user,double latitude,double longitude,double bearing){
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
+                ("latitude")
+                .setValue(latitude);
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
+                ("longitude")
+                .setValue(longitude);
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child("bearing")
+                .setValue(bearing);
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child
+                ("in_a_bus")
+                .setValue(user.isInBus());
+        mDatabase.getRootReference().child("user_locations").child(user.getuName()).child("route")
+                .setValue(user.getRouteNo());
+        mDatabase.getGeoUserInstance().setLocation(user.getuName(),new GeoLocation(latitude,
+                longitude));
+    }
+
 }

@@ -1,29 +1,30 @@
 package com.crystalit.busbuzzlk.Fragments;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.crystalit.busbuzzlk.R;
 import com.crystalit.busbuzzlk.Views.HomeNavigationActivity;
-import com.crystalit.busbuzzlk.Views.ProfileActivity;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link HomeOptionsFragment.OnFragmentInteractionListener} interface
+ * {@link OnBusFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeOptionsFragment#newInstance} factory method to
+ * Use the {@link OnBusFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeOptionsFragment extends Fragment {
-
+public class OnBusFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -35,9 +36,12 @@ public class HomeOptionsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    ImageButton searchButton,busInfoButton,passengerInfoButton;
+    private Button yesButton, noButton;
+    private EditText routeNo;
+    private static OnBusFragment instance;
 
-    public HomeOptionsFragment() {
+    @SuppressLint("ValidFragment")
+    private OnBusFragment() {
         // Required empty public constructor
     }
 
@@ -47,16 +51,19 @@ public class HomeOptionsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeOptionsFragment.
+     * @return A new instance of fragment OnBusFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HomeOptionsFragment newInstance(String param1, String param2) {
-        HomeOptionsFragment fragment = new HomeOptionsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static OnBusFragment newInstance(String param1, String param2) {
+        if (instance == null) {
+            instance = new OnBusFragment();
+            Bundle args = new Bundle();
+            args.putString(ARG_PARAM1, param1);
+            args.putString(ARG_PARAM2, param2);
+            instance.setArguments(args);
+        }
+
+        return instance;
     }
 
     @Override
@@ -72,35 +79,22 @@ public class HomeOptionsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_home_options, container, false);
-        searchButton = view.findViewById(R.id.searchIButton);
-        busInfoButton = view.findViewById(R.id.busInfoButton);
-        passengerInfoButton = view.findViewById(R.id.profileButton);
+        View view = inflater.inflate(R.layout.fragment_on_bus, container, false);
+        yesButton = view.findViewById(R.id.yesButton);
+        noButton = view.findViewById(R.id.no_button);
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onYesButtonClicked();
+            }
+        });
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNoButtonClicked();
+            }
+        });
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
-                //activity.showSearchFragment();
-                activity.getNearestBusesGeoFire(getContext());
-            }
-        });
-        busInfoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
-                activity.showBusFragment();
-            }
-        });
-        passengerInfoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(),
-                        ProfileActivity.class);
-                startActivity(intent);
-
-            }
-        });
         return view;
     }
 
@@ -143,9 +137,45 @@ public class HomeOptionsFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private void addUserToBus(FragmentManager fm) {
+        ProgressDialog pd = new ProgressDialog(getContext());
+        pd.setTitle("Please wait...");
+        pd.show();
 
+        com.crystalit.busbuzzlk.Components.UserManager.getInstance().addUserToaBus(fm, pd);
+    }
+
+    //user says he is in a bus
+    private void onYesButtonClicked() {
+
+        if (com.crystalit.busbuzzlk.Components.UserManager.getInstance().getLoggedUser().isInBus()) {
+            //do nothing
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+        } else {
+            addUserToBus(getFragmentManager());
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+            activity.startLocationUpdates();
+        }
+
+    }
+
+    //user says he is not in a bus
+    private void onNoButtonClicked() {
+
+        if (com.crystalit.busbuzzlk.Components.UserManager.getInstance().getLoggedUser().isInBus()) {
+            //remove the user from current bus
+            com.crystalit.busbuzzlk.Components.UserManager.getInstance().removeUserFromBus();
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+            activity.slowerLocationUpdates();
+            activity.getNearestBusesGeoFire(getContext());
+        } else {
+            //user is not in a bus
+            //close the fragment
+            HomeNavigationActivity activity = (HomeNavigationActivity) getActivity();
+            activity.showHomeFragment();
+        }
     }
 }

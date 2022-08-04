@@ -11,12 +11,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.crystalit.busbuzzlk.Components.InputValidator;
 import com.crystalit.busbuzzlk.R;
 import com.crystalit.busbuzzlk.ViewModels.SignUpViewModel;
 
 public class SignUpFragment extends Fragment {
 
     private SignUpViewModel mViewModel;
+    private InputValidator inputValidator;
 
     // declaring view components
     EditText userNameET, emailET, passwordET, confirmPasswordET;
@@ -46,6 +48,8 @@ public class SignUpFragment extends Fragment {
             }
         });
 
+        inputValidator = new InputValidator();
+
         return fragmentView;
     }
 
@@ -59,19 +63,31 @@ public class SignUpFragment extends Fragment {
     }
 
     private void onSignUpBtnClicked() {
+        boolean valid = true;
         String userName = userNameET.getText().toString();
         String email = emailET.getText().toString();
         String password = passwordET.getText().toString();
         String confirmPassword = confirmPasswordET.getText().toString();
-        if (validateUserInputs(userName, email, password, confirmPassword)) {
+        if (!inputValidator.isValidUsername(userName)) {
+            valid = false;
+            userNameET.setError("Invalid username");
+        }
+        if (!inputValidator.isValidEmail(email)) {
+            valid = false;
+            emailET.setError("Invalid email");
+        }
+        if (!inputValidator.isValidPassword(password)) {
+            valid = false;
+            passwordET.setError("Password should be 8-16 characters");
+        }
+        if (!password.equals(confirmPassword)) {
+            valid = false;
+            confirmPasswordET.setError("Password mismatch");
+        }
+        if (valid) {
             mViewModel.signUpUser(userName, email, password);
         }
     }
 
-    //TODO complete the code
-    private boolean validateUserInputs(String userName, String email, String password, String
-            confirmPasswodrd) {
-        return true;
-    }
 
 }
